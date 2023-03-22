@@ -285,3 +285,40 @@ resource "keycloak_group" "team-b" {
   name     = "team-b"
 }
 ```
+
+## Assign Roles
+
+### Assign Role to User
+
+```
+resource "keycloak_user_roles" "ondrej" {
+  realm_id = keycloak_realm.example.id
+  user_id  = keycloak_user.ondrej.id
+
+  role_ids = [
+    keycloak_role.editor.id,
+  ]
+}
+```
+
+### Assign Role to Group
+
+```
+resource "keycloak_group_roles" "team-a" {
+  realm_id = keycloak_realm.example.id
+  group_id = keycloak_group.team-a.id
+
+  role_ids = [
+    keycloak_role.editor.id,
+  ]
+}
+
+resource "keycloak_group_roles" "team-b" {
+  realm_id = keycloak_realm.example.id
+  group_id = keycloak_group.team-b.id
+
+  role_ids = [
+    keycloak_role.viewer.id,
+  ]
+}
+```
