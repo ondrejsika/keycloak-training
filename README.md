@@ -216,3 +216,22 @@ resource "keycloak_user" "ondrej" {
   }
 }
 ```
+
+## Realm settings
+
+### Login screen customization
+
+- User registration
+- Forgot password
+- Remember me
+
+### Email settings
+
+- Email as username
+- Login with email
+- Duplicate emails
+- Verify email
+
+### User info settings
+
+- Edit username
