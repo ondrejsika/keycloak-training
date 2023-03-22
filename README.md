@@ -190,3 +190,29 @@ resource "keycloak_realm" "example" {
   }
 }
 ```
+
+## Users
+
+### Create User from UI
+
+You can add user here <https://keycloak.sikademo.com/admin/example/console/#/example/users>
+
+### Create User using Terraform
+
+```terraform
+resource "keycloak_user" "ondrej" {
+  realm_id = keycloak_realm.example.id
+  username = "ondrej"
+  enabled  = true
+
+  email          = "ondrej@example.com"
+  email_verified = true
+  first_name     = "Ondrej"
+  last_name      = "Sika"
+
+  initial_password {
+    value     = "a"
+    temporary = true
+  }
+}
+```
