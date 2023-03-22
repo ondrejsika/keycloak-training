@@ -121,3 +121,72 @@ spec:
 ```
 
 Keycloak will be available on <https://keycloak-prod.k8s.sikademo.com>. Admin user is `admin` and password is `admin`.
+
+## Keycloak Terraform Configuration
+
+```terraform
+terraform {
+  required_providers {
+    keycloak = {
+      source = "mrparkers/keycloak"
+    }
+  }
+}
+
+provider "keycloak" {
+  client_id = "admin-cli"
+  url       = "https://keycloak.sikademo.com"
+  username  = "admin"
+  password  = "admin"
+}
+```
+
+```sh
+terraform init
+```
+
+## Realms
+
+### What is Realm
+
+Realm is a container for users, credentials, roles, groups and other entities. Each user belongs to and logs into a specific realm. Realms are isolated from one another and can only manage and authenticate the users that they control.
+
+### Create Realm from UI
+
+Go to <https://keycloak.sikademo.com> and login as `admin` with password `admin`. Click on `Add realm` button and fill the form.
+
+### Create Realm using Terraform
+
+```terraform
+resource "keycloak_realm" "example" {
+  realm                  = "example"
+  enabled                = true
+  display_name           = "Example SSO"
+  display_name_html      = "<h1>Example SSO</h1>"
+}
+```
+
+```sh
+terraform apply
+```
+
+Add email configuration
+
+```terraform
+resource "keycloak_realm" "example" {
+  realm                  = "example"
+  enabled                = true
+  display_name           = "Example SSO"
+  display_name_html      = "<h1>Example SSO</h1>"
+  reset_password_allowed = true
+  smtp_server {
+    host = "maildev-smtp.maildev"
+    port = "25"
+    from = "sso@example.com"
+    auth {
+      username = "xxx"
+      password = "xxx"
+    }
+  }
+}
+```
