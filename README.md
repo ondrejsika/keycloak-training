@@ -340,3 +340,29 @@ resource "keycloak_group_roles" "team-b" {
   ]
 }
 ```
+
+## Clients
+
+### What is Client
+
+Clients are applications that can request authentication from Keycloak. Clients can be applications that are developed by your organization or third-party applications. When you create a client, you can specify the type of client. For example, you can specify that the client is a confidential application that requires a secret to authenticate, or you can specify that the client is a public application that does not require a secret to authenticate.
+
+### Create Client from UI
+
+<https://keycloak.sikademo.com/admin/master/console/#/example/clients>
+
+### Create Client using Terraform
+
+```terraform
+resource "keycloak_openid_client" "example" {
+  realm_id                        = keycloak_realm.example.id
+  client_id                       = "example"
+  client_secret                   = "example"
+  enabled                         = true
+  standard_flow_enabled           = true
+  access_type                     = "PUBLIC" # or "CONFIDENTIAL"
+  valid_redirect_uris             = ["*"]
+  valid_post_logout_redirect_uris = ["*"]
+  web_origins                     = ["*"]
+}
+```
