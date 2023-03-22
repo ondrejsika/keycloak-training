@@ -235,3 +235,29 @@ resource "keycloak_user" "ondrej" {
 ### User info settings
 
 - Edit username
+
+## Roles
+
+### What is Role
+
+Roles and groups have a similar purpose, which is to give users access and permissions to use applications. Groups are a collection of users to which you apply roles and attributes. Roles define specific applications permissions and access control.
+
+A role typically applies to one type of user. For example, an organization may include admin, user, manager, and employee roles. An application can assign access and permissions to a role and then assign multiple users to that role so the users have the same access and permissions. For example, the Admin Console has roles that give permission to users to access different parts of the Admin Console.
+
+### Create Role from UI
+
+<https://keycloak.sikademo.com/admin/master/console/#/example/roles>
+
+### Create Role using Terraform
+
+```terraform
+resource "keycloak_role" "editor" {
+  realm_id = keycloak_realm.example.id
+  name     = "editor"
+}
+
+resource "keycloak_role" "viewer" {
+  realm_id = keycloak_realm.example.id
+  name     = "viewer"
+}
+```
