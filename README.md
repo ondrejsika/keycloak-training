@@ -261,3 +261,27 @@ resource "keycloak_role" "viewer" {
   name     = "viewer"
 }
 ```
+
+## Groups
+
+### What is Group
+
+Groups are a collection of users to which you apply roles and attributes. Roles define specific applications permissions and access control.
+
+### Create Group from UI
+
+<https://keycloak.sikademo.com/admin/master/console/#/example/groups>
+
+### Create Group using Terraform
+
+```terraform
+resource "keycloak_group" "team-a" {
+  realm_id = keycloak_realm.example.id
+  name     = "team-a"
+}
+
+resource "keycloak_group" "team-b" {
+  realm_id = keycloak_realm.example.id
+  name     = "team-b"
+}
+```
