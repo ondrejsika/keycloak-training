@@ -286,6 +286,24 @@ resource "keycloak_group" "team-b" {
 }
 ```
 
+## Assign users into Groups
+
+### Assign User into Group from UI
+
+<https://keycloak.sikademo.com/admin/master/console/#/example/users>
+
+### Assign User into Group using Terraform
+
+```terraform
+resource "keycloak_user_groups" "ondrej" {
+  realm_id = keycloak_realm.example.id
+  user_id  = keycloak_user.ondrej.id
+  group_ids = [
+    keycloak_group.team-b.id,
+  ]
+}
+```
+
 ## Assign Roles
 
 ### Assign Role to User
