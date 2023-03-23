@@ -174,7 +174,7 @@ resource "keycloak_realm" "example" {
 terraform apply
 ```
 
-Add email configuration
+Add email configuration (maildev in kubernetes)
 
 ```terraform
 resource "keycloak_realm" "example" {
@@ -186,6 +186,27 @@ resource "keycloak_realm" "example" {
   smtp_server {
     host = "maildev-smtp.maildev"
     port = "25"
+    from = "sso@example.com"
+    auth {
+      username = "xxx"
+      password = "xxx"
+    }
+  }
+}
+```
+
+Add email configuration (mailhog in docker compose)
+
+```terraform
+resource "keycloak_realm" "example" {
+  realm                  = "example"
+  enabled                = true
+  display_name           = "Example SSO"
+  display_name_html      = "<h1>Example SSO</h1>"
+  reset_password_allowed = true
+  smtp_server {
+    host = "mailhog"
+    port = "1025"
     from = "sso@example.com"
     auth {
       username = "xxx"
