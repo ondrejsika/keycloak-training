@@ -366,3 +366,64 @@ resource "keycloak_openid_client" "example" {
   web_origins                     = ["*"]
 }
 ```
+
+## Client Scopes & Protocol Mappers
+
+## Client Scopes
+
+```terraform
+resource "keycloak_openid_client_scope" "example_groups" {
+  realm_id               = keycloak_realm.example.id
+  name                   = "groups"
+  include_in_token_scope = true
+}
+```
+
+```terraform
+data "keycloak_openid_client_scope" "example_roles" {
+  realm_id = keycloak_realm.example.id
+  name     = "roles"
+}
+```
+
+## Protocol Mappers
+
+### Group Membership Protocol Mapper
+
+```terraform
+resource "keycloak_openid_group_membership_protocol_mapper" "example_groups" {
+  realm_id        = keycloak_realm.example.id
+  client_scope_id = keycloak_openid_client_scope.example_groups.id
+
+  name            = keycloak_openid_client_scope.example_groups.name
+  claim_name      = keycloak_openid_client_scope.example_groups.name
+  full_path       = false
+}
+```
+
+### Realm Roles Protocol Mapper
+
+```terraform
+resource "keycloak_openid_user_realm_role_protocol_mapper" "example_roles" {
+  realm_id        = keycloak_realm.example.id
+  client_scope_id = data.keycloak_openid_client_scope.example_roles.id
+  name            = data.keycloak_openid_client_scope.example_roles.id
+  claim_name      = data.keycloak_openid_client_scope.example_roles.id
+  multivalued     = true
+}
+```
+
+## Default Client Scopes
+
+```terraform
+resource "keycloak_openid_client_default_scopes" "example" {
+  realm_id  = keycloak_realm.example.id
+  client_id = keycloak_openid_client.example.id
+  default_scopes = [
+    "profile",
+    "email",
+    keycloak_openid_client_scope.example_groups.name,
+    data.keycloak_openid_client_scope.example_roles.name,
+  ]
+}
+```
