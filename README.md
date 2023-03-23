@@ -166,13 +166,14 @@ resource "keycloak_realm" "example" {
   realm                  = "example"
   enabled                = true
   display_name           = "Example SSO"
-  display_name_html      = "<h1>Example SSO</h1>"
 }
 ```
 
 ```sh
 terraform apply
 ```
+
+Extra configuration
 
 Add email configuration (maildev in kubernetes)
 
