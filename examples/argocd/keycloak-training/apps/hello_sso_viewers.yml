@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hello-sso-viewers
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: hello-sso
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/sikalabs/charts.git
+    targetRevision: HEAD
+    path: charts/hello-world
+    helm:
+      releaseName: hello-sso-viewers
+      values: |
+        host: hello-sso-viewers.k8s.sikademo.com
+        TEXT: "Viewers!"
+        containerPort: 8000
+        ingressExtraAnnotations:
+          nginx.ingress.kubernetes.io/auth-url: "https://oauth2-proxy-viewers.k8s.sikademo.com/oauth2/auth"
+          nginx.ingress.kubernetes.io/auth-signin: "https://oauth2-proxy-viewers.k8s.sikademo.com/oauth2/start?rd=https://$host$request_uri"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

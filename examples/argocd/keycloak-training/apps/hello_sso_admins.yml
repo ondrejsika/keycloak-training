@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hello-sso-admins
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: hello-sso
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/sikalabs/charts.git
+    targetRevision: HEAD
+    path: charts/hello-world
+    helm:
+      releaseName: hello-sso-admins
+      values: |
+        host: hello-sso-admins.k8s.sikademo.com
+        TEXT: "Admins!"
+        ingressExtraAnnotations:
+          nginx.ingress.kubernetes.io/auth-url: "https://oauth2-proxy-admins.k8s.sikademo.com/oauth2/auth"
+          nginx.ingress.kubernetes.io/auth-signin: "https://oauth2-proxy-admins.k8s.sikademo.com/oauth2/start?rd=https://$host$request_uri"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
