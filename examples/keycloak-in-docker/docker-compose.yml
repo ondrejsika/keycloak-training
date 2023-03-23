@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak
+    command: start-dev
+    ports:
+        - 8080:8080
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - 1025:1025
+      - 8025:8025
