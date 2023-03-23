@@ -139,7 +139,7 @@ terraform {
 
 provider "keycloak" {
   client_id = "admin-cli"
-  url       = "https://keycloak.sikademo.com"
+  url       = "http://localhost:8080"
   username  = "admin"
   password  = "admin"
 }
