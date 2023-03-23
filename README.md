@@ -2,6 +2,10 @@
 
 # Keycloak Training
 
+## Related Repositories
+
+- https://github.com/ondrejsika/nextjs-auth-minimal-example
+
 ## Install Keycloak
 
 ## Install Development Keycloak to Kubernetes using Helm
