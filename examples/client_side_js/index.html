@@ -11,6 +11,13 @@
         document.getElementById("output").textContent = content;
       }
 
+      function outputRawToken(content) {
+        if (typeof content === "object") {
+          content = JSON.stringify(content, null, 2);
+        }
+        document.getElementById("output").innerHTML = '<textarea cols="120" rows="20">'+content+'</textarea>';
+      }
+
       function profile() {
         if (kc.idTokenParsed.name) {
           document.getElementById("name").textContent =
@@ -56,6 +63,7 @@
       <button onclick="window.kc.logout()">Logout</button>
       <button onclick="output(kc.idTokenParsed)">Show ID Token</button>
       <button onclick="output(kc.tokenParsed)">Show Access Token</button>
+      <button onclick="outputRawToken(kc.token)">Show RAW Access Token</button>
       <button
         onclick="window.kc.updateToken(-1).then(function() { output(kc.idTokenParsed); profile() })"
       >
