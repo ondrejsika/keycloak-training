@@ -21,7 +21,7 @@
       function profile() {
         if (kc.idTokenParsed.name) {
           document.getElementById("name").textContent =
-            "Hello " + kc.idTokenParsed.name;
+            "Hello " + kc.idTokenParsed.name + " (dep. " + kc.idTokenParsed.department + ")";
         }
         document.getElementById("user").style.display = "block";
       }
@@ -43,8 +43,9 @@
         realm: "example",
         clientId: "example",
       });
+
       window.onload = function () {
-        kc.init({ messageReceiveTimeout: 100000 }).then(function () {
+        kc.init({}).then(function () {
           if (kc.authenticated) {
             profile();
           } else {
@@ -69,10 +70,10 @@
       >
         Refresh
       </button>
-      <button onclick="sendRequest('/foo-edit')">/foo-edit</button>
-      <button onclick="sendRequest('/bar-edit')">/bar-edit</button>
-      <button onclick="sendRequest('/foo-view')">/foo-view</button>
-      <button onclick="sendRequest('/bar-view')">/bar-view</button>
+      <button onclick="sendRequest('/edit')">/edit</button>
+      <button onclick="sendRequest('/view')">/view</button>
+      <button onclick="sendRequest('/administrator')">/administrator</button>
+      <button onclick="sendRequest('/uzivatel')">/uzivatel</button>
       <h1 id="name"></h2>
       <pre id="output"></pre>
     </div>
