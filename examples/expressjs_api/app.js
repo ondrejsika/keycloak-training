@@ -23,24 +23,24 @@ var keycloak = new Keycloak({
 
 app.use(keycloak.middleware());
 
-app.get('/foo-edit', keycloak.protect('realm:foo-editor'), function (req, res) {
+app.get('/edit', keycloak.protect('editor'), function (req, res) {
   res.setHeader('content-type', 'text/plain');
-  res.send('Foo edit!');
+  res.send('Edit!');
 });
 
-app.get('/bar-edit', keycloak.protect('realm:bar-editor'), function (req, res) {
+app.get('/view', keycloak.protect('viewer'), function (req, res) {
   res.setHeader('content-type', 'text/plain');
-  res.send('Bar edit!');
+  res.send('View!');
 });
 
-app.get('/foo-view', keycloak.protect('realm:foo-viewer'), function (req, res) {
+app.get('/administrator', keycloak.protect('administrator'), function (req, res) {
   res.setHeader('content-type', 'text/plain');
-  res.send('Foo view!');
+  res.send('Administrator!');
 });
 
-app.get('/bar-view', keycloak.protect('realm:bar-viewer'), function (req, res) {
+app.get('/uzivatel', keycloak.protect('uzivatel'), function (req, res) {
   res.setHeader('content-type', 'text/plain');
-  res.send('Bar view!');
+  res.send('Uzivatel!');
 });
 
 app.get('/public', function (req, res) {
