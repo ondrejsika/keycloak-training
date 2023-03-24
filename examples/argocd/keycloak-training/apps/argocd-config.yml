@@ -11,7 +11,7 @@ data:
   oidc.config: |
     name: Keycloak
     issuer: https://keycloak.sikademo.com/realms/example
-    clientID: example
+    clientID: argocd
     clientSecret: example
     requestedScopes: ["openid", "profile", "email", "groups"]
   oidc.tls.insecure.skip.verify: "true"
