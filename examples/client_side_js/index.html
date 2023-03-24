@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Keycloak Example Application</title>
+    <script src="https://unpkg.com/keycloak-js@20.0.1/dist/keycloak.min.js"></script>
+    <script type="text/javascript">
+      function output(content) {
+        if (typeof content === "object") {
+          content = JSON.stringify(content, null, 2);
+        }
+        document.getElementById("output").textContent = content;
+      }
+
+      function profile() {
+        if (kc.idTokenParsed.name) {
+          document.getElementById("name").textContent =
+            "Hello " + kc.idTokenParsed.name;
+        }
+        document.getElementById("user").style.display = "block";
+      }
+
+      function sendRequest(path) {
+        var req = new XMLHttpRequest();
+        req.onreadystatechange = function () {
+          if (req.readyState === 4) {
+            output(req.status + "\n\n" + req.responseText);
+          }
+        };
+        req.open("GET", "http://localhost:3001" + path, true);
+        req.setRequestHeader("Authorization", "Bearer " + kc.token);
+        req.send();
+      }
+
+      var kc = new Keycloak({
+        url: "https://keycloak.sikademo.com",
+        realm: "example",
+        clientId: "example",
+      });
+      window.onload = function () {
+        kc.init({ messageReceiveTimeout: 100000 }).then(function () {
+          if (kc.authenticated) {
+            profile();
+          } else {
+            document.getElementById("anonymous").style.display = "block";
+          }
+        });
+      };
+    </script>
+  </head>
+  <body>
+    <div id="anonymous" style="display: none">
+      <button onclick="window.kc.login()">Login</button>
+    </div>
+
+    <div id="user" style="display: none">
+      <button onclick="window.kc.logout()">Logout</button>
+      <button onclick="output(kc.idTokenParsed)">Show ID Token</button>
+      <button onclick="output(kc.tokenParsed)">Show Access Token</button>
+      <button
+        onclick="window.kc.updateToken(-1).then(function() { output(kc.idTokenParsed); profile() })"
+      >
+        Refresh
+      </button>
+      <button onclick="sendRequest('/foo-edit')">/foo-edit</button>
+      <button onclick="sendRequest('/bar-edit')">/bar-edit</button>
+      <button onclick="sendRequest('/foo-view')">/foo-view</button>
+      <button onclick="sendRequest('/bar-view')">/bar-view</button>
+      <h1 id="name"></h2>
+      <pre id="output"></pre>
+    </div>
+  </body>
+</html>
