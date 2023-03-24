@@ -27,6 +27,6 @@ metadata:
 data:
   policy.csv: |
     g, /argocd-admins, role:admin
-    g, /argocd-readers, role:readonly
+    g, /argocd-viewers, role:readonly
   policy.default: ""
   scopes: '[groups]'
