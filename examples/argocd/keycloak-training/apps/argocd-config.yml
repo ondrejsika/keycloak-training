@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: argocd
+data:
+  url: https://argocd.k8s.sikademo.com
+  admin.enabled: "true"
+  application.instanceLabelKey: argocd.argoproj.io/instance
+  exec.enabled: "false"
+  oidc.config: |
+    name: Keycloak
+    issuer: https://keycloak.sikademo.com/realms/example
+    clientID: example
+    clientSecret: example
+    requestedScopes: ["openid", "profile", "email", "groups"]
+  oidc.tls.insecure.skip.verify: "true"
+  server.rbac.log.enforce.enable: "false"
+  timeout.hard.reconciliation: 0s
+  timeout.reconciliation: 180s
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-rbac-cm
+  namespace: argocd
+data:
+  policy.csv: |
+    g, /argocd-admins, role:admin
+    g, /argocd-readers, role:readonly
+  policy.default: ""
+  scopes: '[groups]'
