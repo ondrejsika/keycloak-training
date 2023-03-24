@@ -24,6 +24,9 @@ spec:
       releaseName: keycloak-training
       values: |
         # https://github.com/bitnami/charts/blob/main/bitnami/keycloak/values.yaml
+        image:
+          repository: sikalabs/bitnami-keycloak-sikademo-theme
+          tag: 20.0.3-debian-11-r5
         replicaCount: 1
         auth:
           createAdminUser: true
