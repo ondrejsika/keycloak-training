@@ -36,6 +36,12 @@ export default async function Page() {
     <section>
       <h1>Home</h1>
       <div>{user ? <SignOut>{`Welcome ${user}`}</SignOut> : <SignIn />}</div>
+      { session?.accessToken && <div style={{marginTop: "15px"}}>
+        <code>{session?.accessToken}</code>
+      </div> }
+      { session && <div style={{marginTop: "15px"}}>
+        <code><pre>{JSON.stringify(session, null, 2)}</pre></code>
+      </div> }
     </section>
   );
 }

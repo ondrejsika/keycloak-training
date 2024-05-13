@@ -14,4 +14,16 @@ export const {
       issuer: process.env.KEYCLOAK_ISSUER,
     })
   ],
+  callbacks: {
+    async session({ session, token, user }) {
+      session.accessToken = token.accessToken;
+      return session;
+    },
+    async jwt({ token, account }) {
+      if (account) {
+        token.accessToken = account.access_token;
+      }
+      return token;
+    },
+  },
 });
