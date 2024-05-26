@@ -11,9 +11,22 @@ import (
 	"golang.org/x/oauth2"
 )
 
+func main() {
+	Cmd.Execute()
+}
+
 var FlagIssuer string
 var FlagClientID string
 var FlagClientSecret string
+
+func init() {
+	Cmd.Flags().StringVar(&FlagIssuer, "issuer", "", "Issuer")
+	Cmd.MarkFlagRequired("issuer")
+	Cmd.Flags().StringVar(&FlagClientID, "client-id", "", "Client ID")
+	Cmd.MarkFlagRequired("client-id")
+	Cmd.Flags().StringVar(&FlagClientSecret, "client-secret", "", "Client Secret")
+	Cmd.MarkFlagRequired("client-secret")
+}
 
 var Cmd = &cobra.Command{
 	Use:   "example",
@@ -21,34 +34,6 @@ var Cmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		Server(FlagIssuer, FlagClientID, FlagClientSecret)
 	},
-}
-
-func init() {
-	Cmd.Flags().StringVar(
-		&FlagIssuer,
-		"issuer",
-		"",
-		"Issuer",
-	)
-	Cmd.MarkFlagRequired("issuer")
-	Cmd.Flags().StringVar(
-		&FlagClientID,
-		"client-id",
-		"",
-		"Client ID",
-	)
-	Cmd.MarkFlagRequired("client-id")
-	Cmd.Flags().StringVar(
-		&FlagClientSecret,
-		"client-secret",
-		"",
-		"Client Secret",
-	)
-	Cmd.MarkFlagRequired("client-secret")
-}
-
-func main() {
-	Cmd.Execute()
 }
 
 func Server(issuer, clientID, clientSecret string) {
