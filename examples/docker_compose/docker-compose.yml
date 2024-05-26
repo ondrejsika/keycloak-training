@@ -1,0 +1,52 @@
+name: keycloak
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.4
+    environment:
+      DB_VENDOR: postgres
+      DB_ADDR: postgres
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_PASSWORD: keycloak_password
+      KEYCLOAK_USER: user
+      KEYCLOAK_PASSWORD: user
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    volumes:
+      - keycloak_data:/opt/jboss/keycloak/standalone/data
+    depends_on:
+      - postgres
+    command:
+      - start
+      - --hostname
+      - keycloak.sikademo.com
+      - --proxy
+      - edge
+  caddy:
+    build:
+      dockerfile_inline: |
+        FROM caddy
+        RUN apk add nss-tools
+        RUN cat <<EOF > /etc/caddy/Caddyfile
+        keycloak.sikademo.com {
+          reverse_proxy http://keycloak:8080
+        }
+        EOF
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+
+volumes:
+  postgres_data:
+  keycloak_data:
+  caddy_data:
