@@ -84,7 +84,7 @@ func Server(issuer, clientID, clientSecret string) {
 
 		fmt.Println(rawIDToken)
 
-		fmt.Fprintf(w, "Login successful! %s", rawIDToken)
+		fmt.Fprintf(w, "%s\n", rawIDToken)
 	})
 
 	fmt.Println("http://localhost:8000/")
