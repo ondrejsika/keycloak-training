@@ -48,7 +48,7 @@ func Server(issuer, clientID, clientSecret string) {
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		Endpoint:     provider.Endpoint(),
-		RedirectURL:  "http://localhost:8080/callback",
+		RedirectURL:  "http://localhost:8000/callback",
 		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 	}
 
@@ -87,6 +87,6 @@ func Server(issuer, clientID, clientSecret string) {
 		fmt.Fprintf(w, "Login successful! %s", rawIDToken)
 	})
 
-	fmt.Println("http://localhost:8080/")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	fmt.Println("http://localhost:8000/")
+	log.Fatal(http.ListenAndServe(":8000", nil))
 }
