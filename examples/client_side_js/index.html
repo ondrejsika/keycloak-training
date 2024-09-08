@@ -33,7 +33,7 @@
             output(req.status + "\n\n" + req.responseText);
           }
         };
-        req.open("GET", "http://localhost:3001" + path, true);
+        req.open("GET", "http://localhost:8001" + path, true);
         req.setRequestHeader("Authorization", "Bearer " + kc.token);
         req.send();
       }
