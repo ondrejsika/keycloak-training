@@ -49,7 +49,7 @@ spec:
     path: charts/simple-keycloak
     helm:
       releaseName: keycloak-dev
-      values: |
+      valuesObject:
         host: keycloak-dev.k8s.sikademo.com
 ```
 
@@ -96,7 +96,7 @@ spec:
     chart: keycloak
     helm:
       releaseName: keycloak-prod
-      values: |
+      valuesObject:
         # https://github.com/bitnami/charts/blob/main/bitnami/keycloak/values.yaml
         replicaCount: 1
         image:
