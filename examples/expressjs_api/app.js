@@ -52,6 +52,6 @@ app.get('/', function (req, res) {
   res.render('index.html');
 });
 
-app.listen(3001, function () {
-  console.log('Started at port 3001');
+app.listen(8001, function () {
+  console.log('Server started on 0.0.0.0:8001, see http://127.0.0.1:8001');
 });
