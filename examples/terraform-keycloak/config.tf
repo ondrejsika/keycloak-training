@@ -13,25 +13,15 @@ locals {
       ]
       department = "IT"
     }
-    "vojtech" = {
-      email      = "vojtech@example.com"
-      first_name = "Vojtech"
-      last_name  = "Mares"
-      enabled    = true
-      group_ids = [
-        module.group--editors.id,
-        module.group--viewers.id,
-        module.group--argocd-viewers.id,
-      ]
-      department = "Support"
-    }
     "alice" = {
       email      = "alice@example.com"
       first_name = "Alice"
       last_name  = "Demo"
       enabled    = true
       group_ids = [
+        module.group--editors.id,
         module.group--viewers.id,
+        module.group--argocd-viewers.id,
       ]
       department = "Office"
     }
@@ -40,8 +30,18 @@ locals {
       first_name = "Bob"
       last_name  = "Demo"
       enabled    = true
-      group_ids  = []
+      group_ids = [
+        module.group--viewers.id,
+      ]
       department = "Trainee"
+    }
+    "charlie" = {
+      email      = "charlie@example.com"
+      first_name = "Charlie"
+      last_name  = "Demo"
+      enabled    = true
+      group_ids  = []
+      department = "Sales"
     }
   }
 }
