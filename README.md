@@ -143,6 +143,10 @@ spec:
 
 Keycloak will be available on <https://keycloak-prod.k8s.sikademo.com>. Admin user is `admin` and password is `admin`.
 
+## Get Keycloak Version
+
+Go to https://keycloak.sikademo.com/admin/master/console/#/master/info
+
 ## Keycloak Terraform Configuration
 
 ```terraform
