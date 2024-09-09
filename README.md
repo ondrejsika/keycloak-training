@@ -8,6 +8,8 @@
 
 ## Install Keycloak
 
+https://www.keycloak.org/guides
+
 ## Install Development Keycloak to Kubernetes using Helm
 
 ```
