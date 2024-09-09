@@ -10,6 +10,18 @@
 
 https://www.keycloak.org/guides
 
+## Install using Docker Compose
+
+See example in [examples/docker-compose](examples/docker-compose)
+
+```sh
+cd examples/docker-compose
+```
+
+```sh
+docker-compose up -d
+```
+
 ## Install Development Keycloak to Kubernetes using Helm
 
 ```
