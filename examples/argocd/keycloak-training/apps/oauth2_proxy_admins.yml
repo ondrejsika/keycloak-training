@@ -22,7 +22,7 @@ spec:
     chart: oauth2-proxy
     helm:
       releaseName: admins
-      values: |
+      valuesObject:
         # https://github.com/oauth2-proxy/manifests/blob/main/helm/oauth2-proxy/values.yaml
         config:
           clientID: "oauth2_proxy"

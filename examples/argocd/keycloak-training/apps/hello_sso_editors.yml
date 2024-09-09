@@ -16,7 +16,7 @@ spec:
     path: charts/hello-world
     helm:
       releaseName: hello-sso-editors
-      values: |
+      valuesObject:
         host: hello-sso-editors.k8s.sikademo.com
         TEXT: "Editors!"
         containerPort: 8000

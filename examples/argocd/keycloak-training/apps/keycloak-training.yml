@@ -22,7 +22,7 @@ spec:
     chart: keycloak
     helm:
       releaseName: keycloak-training
-      values: |
+      valuesObject:
         # https://github.com/bitnami/charts/blob/main/bitnami/keycloak/values.yaml
         image:
           repository: sikalabs/bitnami-keycloak-sikademo-theme

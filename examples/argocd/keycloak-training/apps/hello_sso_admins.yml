@@ -16,7 +16,7 @@ spec:
     path: charts/hello-world
     helm:
       releaseName: hello-sso-admins
-      values: |
+      valuesObject:
         host: hello-sso-admins.k8s.sikademo.com
         TEXT: "Admins!"
         ingressExtraAnnotations:

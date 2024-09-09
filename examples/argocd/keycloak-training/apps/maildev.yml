@@ -23,5 +23,5 @@ spec:
     path: charts/maildev
     helm:
       releaseName: maildev
-      values: |
+      valuesObject:
         host: maildev.k8s.sikademo.com

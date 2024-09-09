@@ -16,7 +16,7 @@ spec:
     path: charts/hello-world
     helm:
       releaseName: hello-sso-viewers
-      values: |
+      valuesObject:
         host: hello-sso-viewers.k8s.sikademo.com
         TEXT: "Viewers!"
         containerPort: 8000
