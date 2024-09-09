@@ -106,16 +106,17 @@ spec:
     - CreateNamespace=true
   source:
     repoURL: https://charts.bitnami.com/bitnami
-    targetRevision: 13.0.2
+    targetRevision: 22.2.1
     chart: keycloak
     helm:
       releaseName: keycloak-prod
       valuesObject:
         # https://github.com/bitnami/charts/blob/main/bitnami/keycloak/values.yaml
+        # https://artifacthub.io/packages/helm/bitnami/keycloak?modal=values
         replicaCount: 1
         image:
           repository: sikalabs/bitnami-keycloak-sikalabs-theme
-          tag: 20.0.3-debian-11-r5
+          tag: 25.0.4-debian-12-r1
         auth:
           createAdminUser: true
           adminUser: admin
@@ -127,11 +128,13 @@ spec:
           type: ClusterIP
         ingress:
           enabled: true
-          hostname: sso.sikalabs.com
+          hostname: sso.sikademo.com
+          tls: true
           annotations:
             kubernetes.io/ingress.class: nginx
             nginx.ingress.kubernetes.io/proxy-body-size: 250m
             nginx.ingress.kubernetes.io/proxy-buffer-size: "64k"
+            cert-manager.io/cluster-issuer: letsencrypt
         postgresql:
           auth:
             postgresPassword: pg
