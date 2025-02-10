@@ -9,7 +9,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
   keycloak:
-    image: quay.io/keycloak/keycloak:24.0.4
+    image: quay.io/keycloak/keycloak:26.1.1
     environment:
       DB_VENDOR: postgres
       DB_ADDR: postgres
@@ -26,8 +26,10 @@ services:
       - start
       - --hostname
       - keycloak.sikademo.com
-      - --proxy
-      - edge
+      - --proxy-headers
+      - xforwarded
+      - --http-enabled
+      - 'true'
   caddy:
     build:
       dockerfile_inline: |
