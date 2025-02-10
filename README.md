@@ -515,3 +515,9 @@ That's it. Do you have any questions? **Let's go for a beer!**
 _Do you like the course? Write me recommendation on Twitter (with handle `@ondrejsika`) and LinkedIn (add me [/in/ondrejsika](https://www.linkedin.com/in/ondrejsika/) and I'll send you request for recommendation). **Thanks**._
 
 Wanna to go for a beer or do some work together? Just [book me](https://book-me.sika.io) :)
+
+## Training Sessions
+
+#### 2025-02-10
+
+- Keycloak Terraform Example - https://github.com/sika-training-examples/2025-02-10_keycloak-terraform-example
