@@ -75,6 +75,7 @@ Keycloak will be available on <https://keycloak-dev.k8s.sikademo.com>. Admin use
 helm upgrade --install \
   keycloak-prod \
   keycloak \
+  --version 22.2.1 \
   --repo https://charts.bitnami.com/bitnami \
   --namespace keycloak-prod \
   --create-namespace \
