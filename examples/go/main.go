@@ -74,17 +74,48 @@ func Server(issuer, clientID, clientSecret string) {
 			return
 		}
 
+		rawAccessToken, ok := oauth2Token.Extra("access_token").(string)
+		if !ok {
+			http.Error(w, "No access_token field in oauth2 token.", http.StatusInternalServerError)
+			return
+		}
+
+		rawRefreshToken, ok := oauth2Token.Extra("refresh_token").(string)
+		if !ok {
+			http.Error(w, "No refresh_token field in oauth2 token.", http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Fprintf(w, "id_token\n")
+		fmt.Fprintf(w, "%s\n", rawIDToken)
+		fmt.Fprintf(w, "\n")
+		fmt.Fprintf(w, "access_token\n")
+		fmt.Fprintf(w, "%s\n", rawAccessToken)
+		fmt.Fprintf(w, "\n")
+		fmt.Fprintf(w, "refresh_token\n")
+		fmt.Fprintf(w, "%s\n", rawRefreshToken)
+		fmt.Fprintf(w, "\n")
+
 		idToken, err := provider.Verifier(&oidc.Config{ClientID: clientID}).Verify(ctx, rawIDToken)
 		if err != nil {
 			http.Error(w, "Failed to verify ID Token: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-
 		_ = idToken // ID Token is now verified and can be used
 
-		fmt.Println(rawIDToken)
+		accessToken, err := provider.Verifier(&oidc.Config{ClientID: clientID}).Verify(ctx, rawAccessToken)
+		if err != nil {
+			http.Error(w, "Failed to verify Access Token: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		_ = accessToken // Access Token is now verified and can be used
 
-		fmt.Fprintf(w, "%s\n", rawIDToken)
+		refreshToken, err := provider.Verifier(&oidc.Config{ClientID: clientID}).Verify(ctx, rawIDToken)
+		if err != nil {
+			http.Error(w, "Failed to verify Refresh Token: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		_ = refreshToken // Refresh Token is now verified and can be used
 	})
 
 	fmt.Println("http://localhost:8000/")
