@@ -12,7 +12,7 @@ https://www.keycloak.org/guides
 
 ## Install using Docker Compose
 
-See example in [examples/docker-compose](examples/docker-compose)
+See example in [examples/docker_compose](examples/docker_compose)
 
 ```sh
 cd examples/docker-compose
