@@ -20,8 +20,6 @@ services:
       KEYCLOAK_PASSWORD: user
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-    volumes:
-      - keycloak_data:/opt/jboss/keycloak/standalone/data
     depends_on:
       - postgres
     command:
@@ -48,5 +46,4 @@ services:
 
 volumes:
   postgres_data:
-  keycloak_data:
   caddy_data:
