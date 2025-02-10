@@ -399,6 +399,29 @@ Clients are applications that can request authentication from Keycloak. Clients 
 
 <https://keycloak.sikademo.com/admin/master/console/#/example/clients>
 
+### Test Direct Access Grants
+
+```sh
+curl -X POST "https://keycloak.sikademo.com/realms/test/protocol/openid-connect/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "client_id=default" \
+  -d "client_secret=default" \
+  -d "grant_type=password" \
+  -d "username=user" \
+  -d "password=a"
+```
+
+```sh
+curl -X POST "https://keycloak.sikademo.com/realms/test/protocol/openid-connect/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "client_id=default" \
+  -d "client_secret=default" \
+  -d "grant_type=password" \
+  -d "username=user" \
+  -d "password=a" \
+  -d "scope=openid"
+```
+
 ### Create Client using Terraform
 
 ```terraform
