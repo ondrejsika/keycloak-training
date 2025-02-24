@@ -22,53 +22,6 @@ cd examples/docker-compose
 docker-compose up -d
 ```
 
-## Install Development Keycloak to Kubernetes using Helm
-
-```
-helm upgrade --install \
-  keycloak-dev \
-  simple-keycloak \
-  --repo https://helm.sikalabs.io \
-  --namespace keycloak-dev \
-  --create-namespace \
-  --set host=keycloak-dev.k8s.sikademo.com
-```
-
-Keycloak will be available on <https://keycloak-dev.k8s.sikademo.com>. Admin user is `admin` and password is `admin`.
-
-## Install Development Keycloak to Kubernetes using ArgoCD
-
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: keycloak-dev
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-spec:
-  project: default
-  destination:
-    namespace: keycloak-dev
-    server: https://kubernetes.default.svc
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-    - CreateNamespace=true
-  source:
-    repoURL: https://github.com/sikalabs/charts.git
-    targetRevision: HEAD
-    path: charts/simple-keycloak
-    helm:
-      releaseName: keycloak-dev
-      valuesObject:
-        host: keycloak-dev.k8s.sikademo.com
-```
-
-Keycloak will be available on <https://keycloak-dev.k8s.sikademo.com>. Admin user is `admin` and password is `admin`.
-
 ## Install Production Keycloak to Kubernetes using Helm
 
 ```
