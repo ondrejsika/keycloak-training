@@ -31,7 +31,7 @@ echo
 
 NEW_RESPONSE=$(curl -fsSL -X POST "https://sso.sikalabs.com/realms/training/protocol/openid-connect/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "client_id=example_cliene_id" \
+  -d "client_id=example_client_id" \
   -d "client_secret=example_client_secret" \
   -d "grant_type=refresh_token" \
   -d "refresh_token=$RAW_REFRESH_TOKEN" )
