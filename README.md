@@ -28,7 +28,7 @@ docker-compose up -d
 helm upgrade --install \
   keycloak-prod \
   keycloak \
-  --version 22.2.1 \
+  --version 26.1.2 \
   --repo https://charts.bitnami.com/bitnami \
   --namespace keycloak-prod \
   --create-namespace \
@@ -43,14 +43,14 @@ Keycloak will be available on <https://keycloak-prod.k8s.sikademo.com>. Admin us
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: keycloak-prod
+  name: keycloak-sikademo-com
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   destination:
-    namespace: keycloak-prod
+    namespace: keycloak-sikademo-com
     server: https://kubernetes.default.svc
   syncPolicy:
     automated:
@@ -59,18 +59,21 @@ spec:
     syncOptions:
     - CreateNamespace=true
   source:
-    repoURL: https://charts.bitnami.com/bitnami
-    targetRevision: 22.2.1
+    repoURL: registry-1.docker.io/bitnamicharts
+    targetRevision: 24.4.10
     chart: keycloak
     helm:
-      releaseName: keycloak-prod
       valuesObject:
         # https://github.com/bitnami/charts/blob/main/bitnami/keycloak/values.yaml
         # https://artifacthub.io/packages/helm/bitnami/keycloak?modal=values
         replicaCount: 1
+        global:
+          security:
+            allowInsecureImages: true
         image:
+          registry: ghcr.io
           repository: sikalabs/bitnami-keycloak-sikalabs-theme
-          tag: 25.0.4-debian-12-r1
+          tag: 26.1.2-debian-12-r0
         auth:
           createAdminUser: true
           adminUser: admin
@@ -82,7 +85,7 @@ spec:
           type: ClusterIP
         ingress:
           enabled: true
-          hostname: sso.sikademo.com
+          hostname: keycloak.sikademo.com
           tls: true
           annotations:
             kubernetes.io/ingress.class: nginx
@@ -95,7 +98,7 @@ spec:
             password: pg
 ```
 
-Keycloak will be available on <https://keycloak-prod.k8s.sikademo.com>. Admin user is `admin` and password is `admin`.
+Keycloak will be available on <https://keycloak.sikademo.com>. Admin user is `admin` and password is `admin`.
 
 ## Get Keycloak Version
 
