@@ -55,6 +55,29 @@ Keycloak is an open-source identity and access management (IAM) solution develop
 - Admin UI, API, and Terraform: Provides an easy-to-use management interface and REST APIs for automation.
 - Self-Service Account Management: Users can manage their profiles, passwords, and sessions.
 
+## Authentication vs Authorization
+
+In OIDC & Keycloak, authentication happens via OpenID Connect (OIDC), while authorization is managed via roles, groups, or policies in Keycloak.
+
+### Authentication (AuthN) – Confirms who you are.
+
+- It verifies a user’s identity (e.g., username & password, MFA, or single sign-on).
+- Example: Logging into a system with a password.
+
+### Authorization (AuthZ) – Determines what you can do.
+
+- It controls access to resources based on permissions and roles.
+- Example: A logged-in user can view their profile but not access admin settings.
+
+### Key Difference
+
+- Authentication
+  - Identity verification
+  - Are you who you claim to be?
+- Authorization
+  - Access control
+  - What are you allowed to do?
+
 ## Install Keycloak
 
 https://www.keycloak.org/guides
