@@ -5,6 +5,7 @@ RESPONSE=$(curl -fsSL -X POST "https://sso.sikalabs.com/realms/training/protocol
   -d "client_id=example_client_id" \
   -d "client_secret=example_client_secret" \
   -d "grant_type=password" \
+  -d "scope=openid" \
   -d "username=example_username" \
   -d "password=example_password" )
 
@@ -24,6 +25,11 @@ echo
 
 echo VALIDATED ACCESS TOKEN:
 slr validate-jwt $(echo $PARSED_ACCESS_TOKEN | jq -r .iss) $RAW_ACCESS_TOKEN
+echo
+
+echo PARSED ID TOKEN:
+PARSED_ID_TOKEN=$(echo $RESPONSE | jq -r .id_token | slr parse-jwt | jq '.[1]')
+echo $PARSED_ID_TOKEN | jq
 echo
 
 echo RAW REFRESH TOKEN:
