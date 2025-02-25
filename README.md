@@ -40,6 +40,10 @@ For sharing links & "secrets".
 
 <https://kniha.sika.io>
 
+## What is Keycloak
+
+Keycloak is an open-source identity and access management (IAM) solution developed by Red Hat. It provides authentication and authorization services for applications and services.
+
 ## Install Keycloak
 
 https://www.keycloak.org/guides
