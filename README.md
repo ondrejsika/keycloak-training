@@ -6,6 +6,40 @@
 
 - https://github.com/ondrejsika/nextjs-auth-minimal-example
 
+## Course
+
+## About Me - Ondrej Sika
+
+__Freelance DevOps Engineer, Consultant & Lecturer__
+
+- Complete DevOps Pipeline
+- Open Source / Linux Stack
+- Cloud & On-Premise
+- Technologies: Git, Gitlab, Gitlab CI, Docker, Kubernetes, Terraform, Prometheus, ELK / EFK, Rancher, Proxmox, DigitalOcean, AWS
+
+## Star, Create Issues, Fork, and Contribute
+
+Feel free to star this repository or fork it.
+
+If you found bug, create issue or pull request.
+
+Also feel free to propose improvements by creating issues.
+
+## Chat
+
+For sharing links & "secrets".
+
+- Zoom Chat
+- Slack - https://sikapublic.slack.com/
+- Microsoft Teams
+- https://sika.link/chat (tlk.io)
+
+## DevOps Kniha (Czech only)
+
+[![](./images/devops_kniha.jpg)](https://kniha.sika.io)
+
+<https://kniha.sika.io>
+
 ## Install Keycloak
 
 https://www.keycloak.org/guides
