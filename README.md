@@ -44,6 +44,17 @@ For sharing links & "secrets".
 
 Keycloak is an open-source identity and access management (IAM) solution developed by Red Hat. It provides authentication and authorization services for applications and services.
 
+## Key Features of Keycloak
+
+- Single Sign-On (SSO): Users can log in once and access multiple applications without re-authenticating.
+- Identity Brokering: Supports authentication via third-party identity providers like Google, Microsoft, or LDAP.
+- User Federation: Integrates with existing user directories (LDAP, Active Directory).
+- Multi-Factor Authentication (MFA): Supports OTP, WebAuthn, and other MFA mechanisms.
+- Fine-Grained Authorization: Offers Role-Based Access Control (RBAC) and Attribute-Based Access Control (ABAC).
+- Protocol Support: Works with OpenID Connect (OIDC) and SAML.
+- Admin UI, API, and Terraform: Provides an easy-to-use management interface and REST APIs for automation.
+- Self-Service Account Management: Users can manage their profiles, passwords, and sessions.
+
 ## Install Keycloak
 
 https://www.keycloak.org/guides
