@@ -1,8 +1,0 @@
-{
-  "realm": "example",
-  "auth-server-url": "https://keycloak.sikademo.com/",
-  "ssl-required": "external",
-  "resource": "example",
-  "public-client": true,
-  "confidential-port": 0
-}
