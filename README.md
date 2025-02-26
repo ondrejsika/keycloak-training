@@ -171,6 +171,8 @@ Output:
 
 ### Keycloak Access Token
 
+This is a Keycloak Access Token (JWT) containing authentication and authorization details for a user.
+
 - acr: Authentication Context Class Reference (e.g., "1" indicating the authentication level).
 - aud: Audience – Specifies the intended recipient of the token (e.g., "account").
 - azp: Authorized Party – The client that requested the token (example_client_id).
@@ -223,6 +225,51 @@ Output:
 
 ```
 eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI4NUdxdnFMT01SdmtNeG4xMmdnaTJFYm1jLVRwZExCQU9tNy1yZko1NkpZIn0.eyJleHAiOjE3NDA1NDkxOTUsImlhdCI6MTc0MDU0ODg5NSwianRpIjoiZGMwYjBhNGEtNDVjZi00OWU3LWJkYmYtZjNmYjFiOTBmODYyIiwiaXNzIjoiaHR0cHM6Ly9zc28uc2lrYWxhYnMuY29tL3JlYWxtcy90cmFpbmluZzIiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiZTFmNjM2OWEtMTZjZi00NTczLThhMWUtYmIxOWVlNDE2MTIxIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZXhhbXBsZV9jbGllbnRfaWQiLCJzaWQiOiIyNDI4NzQ3NS0wZmJmLTQwOGMtYjhjZC0zNTVmYTI0NWVlM2MiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iLCJkZWZhdWx0LXJvbGVzLXRyYWluaW5nMiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6ImV4YW1wbGUgZXhhbXBsZSIsInByZWZlcnJlZF91c2VybmFtZSI6ImV4YW1wbGVfdXNlcm5hbWUiLCJnaXZlbl9uYW1lIjoiZXhhbXBsZSIsImZhbWlseV9uYW1lIjoiZXhhbXBsZSIsImVtYWlsIjoiZXhhbXBsZUBzaWthZGVtby5jb20ifQ.FUZasx0PAl3jFEAhjhPnM1CUAQPJbkrgilQ8ZL2VPXf-F8Uq7A0_ZMCmUUW70AMyERp76vLRbzK--nwRmgWXlxJvsK9HkOy1A_zRX_Wuq-nQSz2lU2E0VzXJsbFRVx6jcGO-4MJwO1gWpxThesOSueJRCeRcznm_ZrS-DmHscCh1TH3c85KCiHxGweETdC-VG8dDJ74wDu-rqXgIqGwXpUgjIRjrwx3TtJe6YIFx7wSis0QypiQk5fV0g59jX49REp-inDC3JMHUElSrYNsvHEKeIua3vHVfD4k9m0-5SY38BDJIpQ0bWmC3U79YB3tDxnxJKIlmzZNJRlsFN-wtOg
+```
+
+### Keycloak ID Token
+
+The ID Token in Keycloak is a JWT (JSON Web Token) that provides identity-related claims about the authenticated user. It is primarily used by OpenID Connect (OIDC) clients to obtain user profile information.
+
+**Purpose of the ID Token**
+
+The ID Token is primarily meant for authentication and providing user identity information to the client application. It is not used for authorization purposes (unlike the Access Token). The client application can decode this token to retrieve user details after successful authentication.
+
+- at_hash: A hash of the Access Token (used for validating access token integrity).
+- aud: Audience – Specifies the client ID (example_client_id) for which the token is issued.
+- azp: Authorized Party – The client that requested the token.
+- exp: Expiration timestamp (Unix time) when the token will expire.
+- iat: Issued At – The timestamp when the token was created.
+- iss: Issuer – The URL of the Keycloak realm that issued the token.
+- jti: Unique identifier for this token.
+- sid: Session ID – Identifies the user session.
+- sub: Subject – The unique user ID in the Keycloak realm.
+- typ: Token type ("ID", indicating this is an ID token).
+
+```json
+{
+  "acr": "1",
+  "at_hash": "gib9PoLgzImfIMdhuO0UwA",
+  "aud": "example_client_id",
+  "azp": "example_client_id",
+  "email": "example@sikademo.com",
+  "email_verified": true,
+  "exp": 1740550026,
+  "family_name": "example",
+  "given_name": "example",
+  "iat": 1740549726,
+  "iss": "https://sso.sikalabs.com/realms/training2",
+  "jti": "b819638c-6824-45f6-a312-a62609b9d7a5",
+  "name": "example example",
+  "preferred_username": "example_username",
+  "sid": "4310b043-a925-4e8b-a559-92400204721d",
+  "sub": "e1f6369a-16cf-4573-8a1e-bb19ee416121",
+  "typ": "ID"
+}
+```
+
+```
+eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI4NUdxdnFMT01SdmtNeG4xMmdnaTJFYm1jLVRwZExCQU9tNy1yZko1NkpZIn0.eyJleHAiOjE3NDA1NTAwMjYsImlhdCI6MTc0MDU0OTcyNiwianRpIjoiYjgxOTYzOGMtNjgyNC00NWY2LWEzMTItYTYyNjA5YjlkN2E1IiwiaXNzIjoiaHR0cHM6Ly9zc28uc2lrYWxhYnMuY29tL3JlYWxtcy90cmFpbmluZzIiLCJhdWQiOiJleGFtcGxlX2NsaWVudF9pZCIsInN1YiI6ImUxZjYzNjlhLTE2Y2YtNDU3My04YTFlLWJiMTllZTQxNjEyMSIsInR5cCI6IklEIiwiYXpwIjoiZXhhbXBsZV9jbGllbnRfaWQiLCJzaWQiOiI0MzEwYjA0My1hOTI1LTRlOGItYTU1OS05MjQwMDIwNDcyMWQiLCJhdF9oYXNoIjoiZ2liOVBvTGd6SW1mSU1kaHVPMFV3QSIsImFjciI6IjEiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6ImV4YW1wbGUgZXhhbXBsZSIsInByZWZlcnJlZF91c2VybmFtZSI6ImV4YW1wbGVfdXNlcm5hbWUiLCJnaXZlbl9uYW1lIjoiZXhhbXBsZSIsImZhbWlseV9uYW1lIjoiZXhhbXBsZSIsImVtYWlsIjoiZXhhbXBsZUBzaWthZGVtby5jb20ifQ.pCZL60D76cmMNPrOTvguVx2bxOfrn4jekP94CE_r1vgGzkbyogRBpGayp2LXkmO0mn-uC_mRNPmlTVZzl9HHJOtflWa6Xn_BDLR8bNCXnHN6TeOLY2QoVkmZ7_K1WzOPNG3fQjQ3VHuxH0roScj5mIqTuy3LHBHhBCTGfCdYB2zpuOU9sOuyyngH_hxfLmdvdbh9gRt4sOl1LeQVnOjTZVymRuFCUy9jYP99hhD_wjSsml1BglT2TXlvub3Rxc5Y-BHmxS_u96IYl6wz0w5mjv1OZ0gTjEtMGFwOamv3YEUjFZlGef8lFV9P4jSCRE7F0KNWC2gXIqDj38BgumEbow
 ```
 
 ## Install Keycloak
