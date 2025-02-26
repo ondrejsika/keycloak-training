@@ -757,6 +757,38 @@ resource "keycloak_openid_client_default_scopes" "example" {
 }
 ```
 
+## Flows
+
+### Example of IDP Only Browser Flow
+
+```terraform
+resource "keycloak_authentication_flow" "idp_only_browser_flow" {
+  realm_id = keycloak_realm.example2.id
+  alias    = "idp_only_browser_flow"
+}
+
+resource "keycloak_authentication_execution" "idp_only_browser_flow_01" {
+  realm_id          = keycloak_realm.example2.id
+  parent_flow_alias = keycloak_authentication_flow.idp_only_browser_flow.alias
+  authenticator     = "identity-provider-redirector"
+  requirement       = "REQUIRED"
+}
+
+resource "keycloak_authentication_execution_config" "idp_only_browser_flow_01" {
+  realm_id     = keycloak_realm.example2.id
+  execution_id = keycloak_authentication_execution.idp_only_browser_flow_01.id
+  alias        = "identity-provider-redirector"
+  config = {
+    defaultProvider = keycloak_oidc_identity_provider.example2.id
+  }
+}
+
+resource "keycloak_authentication_bindings" "browser_authentication_binding" {
+  realm_id     = keycloak_realm.example2.id
+  browser_flow = keycloak_authentication_flow.idp_only_browser_flow.alias
+}
+```
+
 ## Thank you! & Questions?
 
 That's it. Do you have any questions? **Let's go for a beer!**
