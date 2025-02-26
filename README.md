@@ -189,6 +189,22 @@ OAuth 2.0 defines several types of tokens used for different purposes in the aut
 
 OAuth2 does not define ID tokens (those are part of OIDC). It primarily focuses on authorization, not authentication.
 
+## OIDC Tokens
+
+In OpenID Connect (OIDC), which is an identity layer built on top of OAuth2, additional tokens are used:
+
+### ID Token
+
+- A JWT (JSON Web Token) that contains identity information about the authenticated user.
+- Issued by the OpenID Provider after successful authentication.
+- Includes claims such as sub (subject/user ID), email, name, iat (issued at), and exp (expiration).
+- Used by the client to verify the user's identity.
+
+In summary
+
+- OAuth2 focuses on authorization (who can access what).
+- OIDC adds authentication (who the user is) with ID tokens.
+
 ## Keycloak Access Token
 
 This is a Keycloak Access Token (JWT) containing authentication and authorization details for a user.
