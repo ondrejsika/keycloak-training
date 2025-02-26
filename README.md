@@ -105,6 +105,43 @@ OAuth 2.0 and OpenID Connect (OIDC) are related but serve different purposes
 
 If you're building a system that requires logging in users securely, you should use OIDC. If you only need to access APIs on behalf of users, OAuth 2.0 is sufficient.
 
+## JWT (JSON Web Token)
+
+JSON Web Token (JWT) is an open standard (RFC 7519) that defines a compact, URL safe, and self-contained way for securely transmitting information between parties as a JSON object. This information can be verified and trusted because it is digitally signed.
+
+It is commonly used for authentication and authorization in web applications.
+
+### Structure of JWT
+
+A JWT consists of three parts, separated by dots (`.`)
+
+1. Header – Contains metadata, such as the token type (JWT) and signing algorithm (e.g., HS256, RS256).
+2. Payload – Contains claims (statements about the user or token), such as user ID, roles, or expiration time.
+3. Signature – Ensures the integrity of the token using a secret key or public/private key pair.
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+```
+
+### How JWT Works in Authentication
+
+1. A user logs in and receives a JWT from the server.
+2. The client stores the token (e.g., in localStorage or an HTTP-only cookie).
+3. With each request, the client includes the JWT in the Authorization header (`Bearer <token>`).
+4. The server verifies the JWT’s signature and extracts the payload to determine if the request is authorized.
+
+### Pros of JWT
+
+- Stateless (no need for server-side sessions)
+- Compact and efficient (can be sent in headers or URLs)
+- Supports various cryptographic algorithms
+
+### Cons of JWT
+
+- Cannot be revoked easily (unless using short expiration and refresh tokens)
+- Large payloads increase token size
+- Sensitive data should not be stored in the payload, as it can be decoded without the secret key
+
 ## Install Keycloak
 
 https://www.keycloak.org/guides
