@@ -22,6 +22,8 @@
 *.tfvars
 !*.EXAMPLE.tfvars
 override.tf
+# Ignore .terraform.lock.hcl because i want to use latest version of provider in the training
+.terraform.lock.hcl
 
 # Infracost
 .infracost
