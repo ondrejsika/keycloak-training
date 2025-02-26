@@ -78,6 +78,33 @@ In OIDC & Keycloak, authentication happens via OpenID Connect (OIDC), while auth
   - Access control
   - What are you allowed to do?
 
+## OAuth 2.0 vs OpenID Connect (OIDC)
+
+OAuth 2.0 and OpenID Connect (OIDC) are related but serve different purposes
+
+### OAuth 2.0
+
+- Purpose: Authorization framework.
+- What it does: Allows users to grant third-party applications access to their resources without sharing credentials.
+- Example Use Case: A user logs into a service using "Sign in with Google", granting the app access to their Google Drive files.
+- Tokens: Issues an access token that applications use to access APIs on behalf of the user.
+- No Identity Information: OAuth alone does not provide user authentication or identity details.
+
+### OpenID Connect (OIDC)
+
+- Purpose: Authentication layer on top of OAuth 2.0.
+- What it does: Verifies user identity and provides user profile information.
+- Example Use Case: A user logs into an application using “Sign in with Google,” and the application gets their email and profile info.
+- Tokens: Issues an ID token (JWT) containing user identity details (like name, email, etc.), along with an access token.
+- Identity Information: Designed to authenticate users, making it useful for Single Sign-On (SSO).
+
+### Key Difference
+
+- OAuth 2.0 is for authorization (who can access what).
+- OIDC is for authentication (who the user is).
+
+If you're building a system that requires logging in users securely, you should use OIDC. If you only need to access APIs on behalf of users, OAuth 2.0 is sufficient.
+
 ## Install Keycloak
 
 https://www.keycloak.org/guides
