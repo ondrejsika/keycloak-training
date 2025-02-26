@@ -28,5 +28,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Println("ID Token is valid")
+	log.Println("Token is valid")
 }
