@@ -169,6 +169,62 @@ Output:
 ]
 ```
 
+### Keycloak Access Token
+
+- acr: Authentication Context Class Reference (e.g., "1" indicating the authentication level).
+- aud: Audience – Specifies the intended recipient of the token (e.g., "account").
+- azp: Authorized Party – The client that requested the token (example_client_id).
+- exp: Expiration timestamp (Unix time) when the token will expire.
+- iat: Issued At – When the token was created.
+- iss: Issuer – The Keycloak server that issued the token.
+- jti: Unique identifier for the token.
+- sid: Session ID – Identifies the user's session.
+- sub: Subject – The unique user ID in the Keycloak realm.
+- typ: Type of token (e.g., "Bearer").
+- scope: The scopes requested during authentication ("openid email profile"), which define what user data is included in the token.
+
+```json
+{
+  "acr": "1",
+  "aud": "account",
+  "azp": "example_client_id",
+  "email": "example@sikademo.com",
+  "email_verified": true,
+  "exp": 1740549195,
+  "family_name": "example",
+  "given_name": "example",
+  "iat": 1740548895,
+  "iss": "https://sso.sikalabs.com/realms/training2",
+  "jti": "dc0b0a4a-45cf-49e7-bdbf-f3fb1b90f862",
+  "name": "example example",
+  "preferred_username": "example_username",
+  "realm_access": {
+    "roles": [
+      "offline_access",
+      "uma_authorization",
+      "default-roles-training2"
+    ]
+  },
+  "resource_access": {
+    "account": {
+      "roles": [
+        "manage-account",
+        "manage-account-links",
+        "view-profile"
+      ]
+    }
+  },
+  "scope": "openid email profile",
+  "sid": "24287475-0fbf-408c-b8cd-355fa245ee3c",
+  "sub": "e1f6369a-16cf-4573-8a1e-bb19ee416121",
+  "typ": "Bearer"
+}
+```
+
+```
+eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI4NUdxdnFMT01SdmtNeG4xMmdnaTJFYm1jLVRwZExCQU9tNy1yZko1NkpZIn0.eyJleHAiOjE3NDA1NDkxOTUsImlhdCI6MTc0MDU0ODg5NSwianRpIjoiZGMwYjBhNGEtNDVjZi00OWU3LWJkYmYtZjNmYjFiOTBmODYyIiwiaXNzIjoiaHR0cHM6Ly9zc28uc2lrYWxhYnMuY29tL3JlYWxtcy90cmFpbmluZzIiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiZTFmNjM2OWEtMTZjZi00NTczLThhMWUtYmIxOWVlNDE2MTIxIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZXhhbXBsZV9jbGllbnRfaWQiLCJzaWQiOiIyNDI4NzQ3NS0wZmJmLTQwOGMtYjhjZC0zNTVmYTI0NWVlM2MiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iLCJkZWZhdWx0LXJvbGVzLXRyYWluaW5nMiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6ImV4YW1wbGUgZXhhbXBsZSIsInByZWZlcnJlZF91c2VybmFtZSI6ImV4YW1wbGVfdXNlcm5hbWUiLCJnaXZlbl9uYW1lIjoiZXhhbXBsZSIsImZhbWlseV9uYW1lIjoiZXhhbXBsZSIsImVtYWlsIjoiZXhhbXBsZUBzaWthZGVtby5jb20ifQ.FUZasx0PAl3jFEAhjhPnM1CUAQPJbkrgilQ8ZL2VPXf-F8Uq7A0_ZMCmUUW70AMyERp76vLRbzK--nwRmgWXlxJvsK9HkOy1A_zRX_Wuq-nQSz2lU2E0VzXJsbFRVx6jcGO-4MJwO1gWpxThesOSueJRCeRcznm_ZrS-DmHscCh1TH3c85KCiHxGweETdC-VG8dDJ74wDu-rqXgIqGwXpUgjIRjrwx3TtJe6YIFx7wSis0QypiQk5fV0g59jX49REp-inDC3JMHUElSrYNsvHEKeIua3vHVfD4k9m0-5SY38BDJIpQ0bWmC3U79YB3tDxnxJKIlmzZNJRlsFN-wtOg
+```
+
 ## Install Keycloak
 
 https://www.keycloak.org/guides
