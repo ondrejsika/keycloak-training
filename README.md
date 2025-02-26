@@ -208,7 +208,7 @@ Go to https://keycloak.sikademo.com/admin/master/console/#/master/info
 terraform {
   required_providers {
     keycloak = {
-      source = "mrparkers/keycloak"
+      source = "keycloak/keycloak"
     }
   }
 }
