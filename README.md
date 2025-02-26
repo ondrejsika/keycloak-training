@@ -142,6 +142,33 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4
 - Large payloads increase token size
 - Sensitive data should not be stored in the payload, as it can be decoded without the secret key
 
+### Parse JWT
+
+You can use: https://jwt.io
+
+or use `slr parse-jwt` command
+
+```
+echo eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c | slr parse-jwt | jq
+```
+
+Output:
+
+```json
+[
+  {
+    "alg": "HS256",
+    "typ": "JWT"
+  },
+  {
+    "iat": 1516239022,
+    "name": "John Doe",
+    "sub": "1234567890"
+  },
+  "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+]
+```
+
 ## Install Keycloak
 
 https://www.keycloak.org/guides
