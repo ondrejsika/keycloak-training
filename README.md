@@ -169,6 +169,26 @@ Output:
 ]
 ```
 
+## OAuth 2.0 Tokens
+
+OAuth 2.0 defines several types of tokens used for different purposes in the authentication and authorization process.
+
+### Access Token
+
+- Grants access to protected resources on behalf of the user.
+- Sent in API requests (e.g., Authorization: Bearer <token>).
+- Typically short-lived for security reasons.
+- Format varies (JWT, opaque string, etc.), depending on the authorization server.
+
+### Refresh Token
+
+- Used to obtain a new access token without requiring user interaction.
+- Long-lived but can be revoked by the authorization server.
+- Not always issued (depends on grant type and server configuration).
+- Should be stored securely, as it can be used to generate new access tokens.
+
+OAuth2 does not define ID tokens (those are part of OIDC). It primarily focuses on authorization, not authentication.
+
 ## Keycloak Access Token
 
 This is a Keycloak Access Token (JWT) containing authentication and authorization details for a user.
