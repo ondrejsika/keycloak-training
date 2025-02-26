@@ -759,6 +759,35 @@ resource "keycloak_openid_client_default_scopes" "example" {
 
 ## Flows
 
+In Keycloak, flows are authentication processes that define how users authenticate and interact with Keycloak during login, registration, and other identity-related actions. These flows are highly customizable and consist of multiple execution steps, allowing for complex authentication and authorization scenarios.
+
+### Types of Flows in Keycloak
+
+- Browser Flow – Handles web-based authentication, such as logging in through a browser.
+- Direct Grant Flow – Used for authentication via API (e.g., OAuth 2.0 password grant).
+- Registration Flow – Defines how user registration is handled.
+- Reset Credentials Flow – Manages the process of resetting user credentials (e.g., forgotten passwords).
+- Client Authentication Flow – Used for authenticating clients (applications) to Keycloak.
+- First Broker Login Flow – Manages authentication when users log in using an external identity provider (e.g., Google, GitHub, LDAP).
+- User-initiated Action Flow – Defines actions users can take after login, like updating passwords.
+
+### Flow Structure
+
+Each flow consists of authentication executions, which are steps in the flow. These executions can be
+
+- Required – Must be executed for authentication to proceed.
+- Alternative – Can be skipped if another option is available.
+- Disabled – Not executed.
+- Conditional – Executed only if certain conditions are met.
+
+### Flow Customization
+
+You can modify existing flows or create new ones under Authentication > Flows in the Keycloak Admin Console. This allows you to:
+
+- Add or remove authentication steps.
+- Enforce MFA (Multi-Factor Authentication).
+- Integrate external identity providers.
+
 ### Example of IDP Only Browser Flow
 
 ```terraform
