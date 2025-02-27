@@ -778,9 +778,9 @@ Setup NVM
 
 ```sh
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-echo '. "~/.nvm/nvm.sh"' >> ~/.zshrc
-echo '. "~/.nvm/nvm.sh"' >> ~/.bashrc
-. "~/.nvm/nvm.sh"
+echo '. ~/.nvm/nvm.sh' >> ~/.zshrc
+echo '. ~/.nvm/nvm.sh' >> ~/.bashrc
+. ~/.nvm/nvm.sh
 ```
 
 Install Node 22
