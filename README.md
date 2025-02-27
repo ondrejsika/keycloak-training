@@ -772,6 +772,29 @@ resource "keycloak_openid_client_optional_scopes" "example" {
 }
 ```
 
+## Install Node.js
+
+Setup NVM
+
+```sh
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+echo '. "~/.nvm/nvm.sh"' >> ~/.zshrc
+echo '. "~/.nvm/nvm.sh"' >> ~/.bashrc
+. "~/.nvm/nvm.sh"
+```
+
+Install Node 22
+
+```sh
+nvm install 22
+```
+
+Use Node 22
+
+```sh
+nvm use 22
+```
+
 ## Flows
 
 In Keycloak, flows are authentication processes that define how users authenticate and interact with Keycloak during login, registration, and other identity-related actions. These flows are highly customizable and consist of multiple execution steps, allowing for complex authentication and authorization scenarios.
