@@ -892,6 +892,11 @@ Wanna to go for a beer or do some work together? Just [book me](https://book-me.
 
 ## Training Sessions
 
+#### 2025-02-26 Ataccama
+
+- https://github.com/sika-training-examples/2025-02-26_keycloak-ataccama-example (in training example repo)
+- https://github.com/sika-training-examples/2025-02-27_keycloak-mapping-example (better example of atrribute mapping and user federation)
+
 #### 2025-02-10
 
 - Keycloak Terraform Example - https://github.com/sika-training-examples/2025-02-10_keycloak-terraform-example
