@@ -799,6 +799,20 @@ nvm use 22
 
 [examples/express_api_simple](./examples/express_api_simple)
 
+```sh
+cd examples/express_api_simple
+npm install
+cp .env.dist .env
+```
+
+```sh
+vim .env
+```
+
+```sh
+npm start
+```
+
 ## Flows
 
 In Keycloak, flows are authentication processes that define how users authenticate and interact with Keycloak during login, registration, and other identity-related actions. These flows are highly customizable and consist of multiple execution steps, allowing for complex authentication and authorization scenarios.
