@@ -757,6 +757,21 @@ resource "keycloak_openid_client_default_scopes" "example" {
 }
 ```
 
+## Optional Client Scopes
+
+Must be requested by the client
+
+```terraform
+resource "keycloak_openid_client_optional_scopes" "example" {
+  realm_id  = keycloak_realm.example.id
+  client_id = keycloak_openid_client.example.id
+
+  optional_scopes = [
+    keycloak_openid_client_scope.example_groups.name,
+  ]
+}
+```
+
 ## Flows
 
 In Keycloak, flows are authentication processes that define how users authenticate and interact with Keycloak during login, registration, and other identity-related actions. These flows are highly customizable and consist of multiple execution steps, allowing for complex authentication and authorization scenarios.
