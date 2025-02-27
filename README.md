@@ -795,6 +795,10 @@ Use Node 22
 nvm use 22
 ```
 
+## Express.js example without any Keycloak Library
+
+[examples/express_api_simple](./examples/express_api_simple)
+
 ## Flows
 
 In Keycloak, flows are authentication processes that define how users authenticate and interact with Keycloak during login, registration, and other identity-related actions. These flows are highly customizable and consist of multiple execution steps, allowing for complex authentication and authorization scenarios.
