@@ -11,7 +11,7 @@ const keycloakConfig = {
     authServerUrl: process.env.KEYCLOAK_AUTH_SERVER_URL,
     clientId: process.env.KEYCLOAK_CLIENT_ID,
     clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
-    redirectUri: "http://localhost:3000/callback"
+    redirectUri: process.env.ORIGIN+"/callback"
 };
 
 // Step 1: Redirect user to Keycloak login
@@ -60,4 +60,4 @@ app.get('/callback', async (req, res) => {
     }
 });
 
-app.listen(3000, () => console.log('Server running on http://localhost:3000/'));
+app.listen(process.env.PORT, () => console.log('Server running on '+process.env.ORIGIN));
