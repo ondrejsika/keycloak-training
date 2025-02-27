@@ -65,5 +65,5 @@ app.get('/', function (req, res) {
 });
 
 app.listen(8001, function () {
-  console.log('Server started on 0.0.0.0:8001, see http://127.0.0.1:8001');
+  console.log('Server started on 0.0.0.0:'+process.env.PORT+', see http://127.0.0.1:'+process.env.PORT);
 });
