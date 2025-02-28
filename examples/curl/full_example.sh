@@ -19,7 +19,7 @@ echo $RAW_ACCESS_TOKEN
 echo
 
 echo PARSED ACCESS TOKEN:
-PARSED_ACCESS_TOKEN=$(echo $RESPONSE | jq -r .access_token | slr parse-jwt - | jq '.[1]')
+PARSED_ACCESS_TOKEN=$(echo $RESPONSE | jq -r .access_token | slu jwt parse - | jq '.[1]')
 echo $PARSED_ACCESS_TOKEN | jq
 echo
 
@@ -28,7 +28,7 @@ slr validate-jwt $(echo $PARSED_ACCESS_TOKEN | jq -r .iss) $RAW_ACCESS_TOKEN
 echo
 
 echo PARSED ID TOKEN:
-PARSED_ID_TOKEN=$(echo $RESPONSE | jq -r .id_token | slr parse-jwt - | jq '.[1]')
+PARSED_ID_TOKEN=$(echo $RESPONSE | jq -r .id_token | slu jwt parse - | jq '.[1]')
 echo $PARSED_ID_TOKEN | jq
 echo
 
@@ -38,7 +38,7 @@ echo $RAW_REFRESH_TOKEN
 echo
 
 echo PARSED REFRESH TOKEN:
-echo $RESPONSE | jq -r .refresh_token | slr parse-jwt - | jq '.[1]'
+echo $RESPONSE | jq -r .refresh_token | slu jwt parse - | jq '.[1]'
 echo
 
 NEW_RESPONSE=$(curl -sSL -X POST "https://sso.sikalabs.com/realms/training/protocol/openid-connect/token" \
