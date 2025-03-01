@@ -24,7 +24,7 @@ echo $PARSED_ACCESS_TOKEN | jq
 echo
 
 echo VALIDATED ACCESS TOKEN:
-slr validate-jwt $(echo $PARSED_ACCESS_TOKEN | jq -r .iss) $RAW_ACCESS_TOKEN
+slu jwt validate $(echo $PARSED_ACCESS_TOKEN | jq -r .iss) $RAW_ACCESS_TOKEN
 echo
 
 echo PARSED ID TOKEN:
