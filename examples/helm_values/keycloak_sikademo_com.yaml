@@ -7,7 +7,7 @@ global:
 image:
   registry: ghcr.io
   repository: sikalabs/bitnami-keycloak-sikalabs-theme
-  tag: 26.1.2-debian-12-r0
+  tag: 26.3.3-debian-12-r0
 auth:
   createAdminUser: true
   adminUser: admin
