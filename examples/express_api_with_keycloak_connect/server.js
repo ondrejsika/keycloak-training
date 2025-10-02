@@ -31,6 +31,16 @@ const keycloak = new Keycloak({ store: memoryStore }, {
 
 app.use(keycloak.middleware());
 
+app.get('/realm-edit', keycloak.protect('realm:editor'), function (req, res) {
+  res.setHeader('content-type', 'text/plain');
+  res.send('Edit! (realm role)');
+});
+
+app.get('/realm-view', keycloak.protect('realm:viewer'), function (req, res) {
+  res.setHeader('content-type', 'text/plain');
+  res.send('View! (realm role)');
+});
+
 app.get('/edit', keycloak.protect('editor'), function (req, res) {
   res.setHeader('content-type', 'text/plain');
   res.send('Edit!');
