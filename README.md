@@ -330,7 +330,7 @@ docker-compose up -d
 helm upgrade --install \
   keycloak-sikademo-com \
   oci://registry-1.docker.io/bitnamicharts/keycloak \
-  --version 24.4.10 \
+  --version 25.2.0 \
   --namespace keycloak-sikademo-com \
   --create-namespace \
   --values examples/helm_values/keycloak_sikademo_com.yaml
