@@ -17,6 +17,9 @@ auth:
 proxyAddressForwarding: true
 service:
   type: ClusterIP
+extraEnvVars:
+  - name: KC_FEATURES
+    value: "organization"
 ingress:
   enabled: true
   hostname: keycloak.sikademo.com
