@@ -328,15 +328,15 @@ docker-compose up -d
 
 ```
 helm upgrade --install \
-  keycloak-k8s-sikademo-com \
+  keycloak-sikademo-com \
   oci://registry-1.docker.io/bitnamicharts/keycloak \
   --version 24.4.10 \
-  --namespace keycloak-k8s-sikademo-com \
+  --namespace keycloak-sikademo-com \
   --create-namespace \
-  --values examples/helm-values/keycloak-k8s-sikademo-com.yaml
+  --values examples/helm_values/keycloak_sikademo_com.yaml
 ```
 
-Keycloak will be available on <https://keycloak.k8s.sikademo.com>. Admin user is `admin` and password is `admin`.
+Keycloak will be available on <https://keycloak.sikademo.com>. Admin user is `admin` and password is `admin`.
 
 ## Install Production Keycloak to Kubernetes using ArgoCD
 
