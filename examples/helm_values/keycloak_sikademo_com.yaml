@@ -19,7 +19,7 @@ service:
   type: ClusterIP
 extraEnvVars:
   - name: KC_FEATURES
-    value: "organization"
+    value: "organization,scripts,admin-fine-grained-authz:v2"
 ingress:
   enabled: true
   hostname: keycloak.sikademo.com
