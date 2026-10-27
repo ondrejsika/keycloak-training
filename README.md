@@ -8,7 +8,7 @@
 
 ## Course
 
-## About Me - Ondrej Sika
+## About Me: [Ondrej Sika](https://sika.io)
 
 __Freelance DevOps Engineer, Consultant & Lecturer__
 
