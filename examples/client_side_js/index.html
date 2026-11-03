@@ -2,8 +2,15 @@
 <html>
   <head>
     <title>Keycloak Example Application</title>
-    <script src="https://unpkg.com/keycloak-js@20.0.1/dist/keycloak.min.js"></script>
-    <script type="text/javascript">
+    <script type="module">
+      import Keycloak from "https://unpkg.com/keycloak-js@26.2.5/lib/keycloak.js";
+
+      const kc = new Keycloak({
+        url: "https://keycloak.sikademo.com",
+        realm: "example",
+        clientId: "example",
+      });
+
       function output(content) {
         if (typeof content === "object") {
           content = JSON.stringify(content, null, 2);
@@ -12,10 +19,11 @@
       }
 
       function outputRawToken(content) {
-        if (typeof content === "object") {
-          content = JSON.stringify(content, null, 2);
-        }
-        document.getElementById("output").innerHTML = '<textarea cols="120" rows="20">'+content+'</textarea>';
+        const textarea = document.createElement("textarea");
+        textarea.cols = 120;
+        textarea.rows = 20;
+        textarea.value = content;
+        document.getElementById("output").replaceChildren(textarea);
       }
 
       function profile() {
@@ -26,54 +34,63 @@
         document.getElementById("user").style.display = "block";
       }
 
-      function sendRequest(path) {
-        var req = new XMLHttpRequest();
-        req.onreadystatechange = function () {
-          if (req.readyState === 4) {
-            output(req.status + "\n\n" + req.responseText);
-          }
-        };
-        req.open("GET", "http://localhost:8001" + path, true);
-        req.setRequestHeader("Authorization", "Bearer " + kc.token);
-        req.send();
+      async function sendRequest(path) {
+        try {
+          const res = await fetch("http://localhost:8001" + path, {
+            headers: { Authorization: "Bearer " + kc.token },
+          });
+          output(res.status + "\n\n" + (await res.text()));
+        } catch (err) {
+          output("Request failed: " + err);
+        }
       }
 
-      var kc = new Keycloak({
-        url: "https://keycloak.sikademo.com",
-        realm: "example",
-        clientId: "example",
+      const actions = {
+        login: () => kc.login(),
+        logout: () => kc.logout(),
+        idToken: () => output(kc.idTokenParsed),
+        accessToken: () => output(kc.tokenParsed),
+        rawToken: () => outputRawToken(kc.token),
+        refresh: async () => {
+          await kc.updateToken(-1);
+          output(kc.idTokenParsed);
+          profile();
+        },
+      };
+
+      document.addEventListener("click", (e) => {
+        const button = e.target.closest("button");
+        if (!button) return;
+        if (button.dataset.action) actions[button.dataset.action]();
+        if (button.dataset.path) sendRequest(button.dataset.path);
       });
 
-      window.onload = function () {
-        kc.init({}).then(function () {
-          if (kc.authenticated) {
-            profile();
-          } else {
-            document.getElementById("anonymous").style.display = "block";
-          }
-        });
-      };
+      const authenticated = await kc.init({
+        onLoad: "check-sso",
+        pkceMethod: "S256",
+      });
+      if (authenticated) {
+        profile();
+      } else {
+        document.getElementById("anonymous").style.display = "block";
+      }
     </script>
   </head>
   <body>
     <div id="anonymous" style="display: none">
-      <button onclick="window.kc.login()">Login</button>
+      <button data-action="login">Login</button>
     </div>
 
     <div id="user" style="display: none">
-      <button onclick="window.kc.logout()">Logout</button>
-      <button onclick="output(kc.idTokenParsed)">Show ID Token</button>
-      <button onclick="output(kc.tokenParsed)">Show Access Token</button>
-      <button onclick="outputRawToken(kc.token)">Show RAW Access Token</button>
-      <button
-        onclick="window.kc.updateToken(-1).then(function() { output(kc.idTokenParsed); profile() })"
-      >
-        Refresh
-      </button>
-      <button onclick="sendRequest('/edit')">/edit</button>
-      <button onclick="sendRequest('/view')">/view</button>
-      <button onclick="sendRequest('/administrator')">/administrator</button>
-      <button onclick="sendRequest('/uzivatel')">/uzivatel</button>
+      <button data-action="logout">Logout</button>
+      <button data-action="idToken">Show ID Token</button>
+      <button data-action="accessToken">Show Access Token</button>
+      <button data-action="rawToken">Show RAW Access Token</button>
+      <button data-action="refresh">Refresh</button>
+      <button data-path="/edit">/edit</button>
+      <button data-path="/view">/view</button>
+      <button data-path="/administrator">/administrator</button>
+      <button data-path="/uzivatel">/uzivatel</button>
       <h1 id="name"></h1>
       <pre id="output"></pre>
     </div>
