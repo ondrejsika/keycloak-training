@@ -769,8 +769,14 @@ In Keycloak, flows are authentication processes that define how users authentica
 - Registration Flow – Defines how user registration is handled.
 - Reset Credentials Flow – Manages the process of resetting user credentials (e.g., forgotten passwords).
 - Client Authentication Flow – Used for authenticating clients (applications) to Keycloak.
-- First Broker Login Flow – Manages authentication when users log in using an external identity provider (e.g., Google, GitHub, LDAP).
-- User-initiated Action Flow – Defines actions users can take after login, like updating passwords.
+- First Broker Login Flow – Runs the first time a user logs in through an external identity provider (e.g., Google, GitHub, another OIDC/SAML IdP), to create or link the Keycloak account. (LDAP is User Federation, not an identity provider, so this flow is not used for it.)
+- Docker Authentication Flow – Used for authenticating to a Docker registry with Keycloak as its auth server.
+
+### Required Actions
+
+Required Actions are not a flow, they are a separate concept (Authentication > Required actions). A required action is a step the user must complete before they can finish logging in, e.g. Update Password, Configure OTP, Verify Email, Update Profile or Terms and Conditions. They can be set on a user by an admin, set by default for new users, or triggered by Keycloak itself (e.g. expired password).
+
+Application Initiated Actions (AIA) are another feature built on top of required actions: the application asks Keycloak to run one action, for example by adding `kc_action=UPDATE_PASSWORD` to the authorization request. The user completes it and is redirected back to the application.
 
 ### Flow Structure
 
