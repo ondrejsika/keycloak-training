@@ -694,6 +694,8 @@ The recommended flow for any app with a user. The user logs in on Keycloak's log
 
 **PKCE** (Proof Key for Code Exchange, RFC 7636) protects the code: the app generates a random `code_verifier`, sends its SHA-256 hash (`code_challenge`) in the login request, and must send the original `code_verifier` when exchanging the code. An attacker who steals the code from the redirect can't use it without the verifier. PKCE is required for public clients and recommended for confidential clients too (mandatory in OAuth 2.1).
 
+<!--
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -721,6 +723,8 @@ sequenceDiagram
     App->>API: GET /resource<br/>Authorization: Bearer access_token
     API-->>App: Protected data
 ```
+
+-->
 
 Try it manually with the public `example` client. Generate the PKCE pair:
 
