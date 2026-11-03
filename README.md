@@ -1033,6 +1033,111 @@ You can modify existing flows or create new ones under Authentication > Flows in
 - Enforce MFA (Multi-Factor Authentication).
 - Integrate external identity providers.
 
+### Conditional Flows
+
+A sub-flow with requirement **Conditional** runs only if all the conditions inside it are true. Conditions are special executions (`Condition - ...`) at the top of the sub-flow. If any of them is false, the whole sub-flow is skipped. This lets you build flows like "ask for OTP only for admins" or "ask for a second factor only when the app needs it".
+
+The built-in `browser` flow already uses one:
+
+```
+browser
+├── Cookie                                   ALTERNATIVE
+├── Identity Provider Redirector             ALTERNATIVE
+└── forms                                    ALTERNATIVE
+    ├── Username Password Form               REQUIRED
+    └── Browser - Conditional OTP            CONDITIONAL
+        ├── Condition - user configured      REQUIRED
+        └── OTP Form                         REQUIRED
+```
+
+`Condition - user configured` is true when the user has set up the authenticators in the sub-flow (here an OTP). So users with OTP are asked for it, and users without it are not.
+
+Available conditions:
+
+- Condition - user configured – the user has credentials for the executions in the sub-flow.
+- Condition - user role – the user has a given role (`negate` inverts it).
+- Condition - user attribute – a user attribute has a given value.
+- Condition - client scope – the client requested a given client scope.
+- Condition - sub-flow executed – another sub-flow did (or didn't) run.
+- Condition - Level of Authentication – used for step-up authentication. The client asks for a level with `acr_values` (e.g. `acr_values=gold`), and only the sub-flows up to that level run. Realm settings > General > ACR to LoA Mapping maps `acr` values to levels.
+
+Built-in flows can't be edited directly. Duplicate one (Authentication > Flows > ⋮ > Duplicate), change the copy, and bind it (⋮ > Bind flow) as the realm's browser flow, or override it on a single client (Client > Advanced > Authentication flow overrides).
+
+### Example of Browser Flow with OTP only for Admins
+
+Users with the `admin` realm role must use OTP. If they don't have it yet, Keycloak asks them to set it up at login. Other users log in with a password only.
+
+```terraform
+resource "keycloak_authentication_flow" "browser_admin_otp" {
+  realm_id = keycloak_realm.example.id
+  alias    = "browser_admin_otp"
+}
+
+resource "keycloak_authentication_execution" "browser_admin_otp_cookie" {
+  realm_id          = keycloak_realm.example.id
+  parent_flow_alias = keycloak_authentication_flow.browser_admin_otp.alias
+  authenticator     = "auth-cookie"
+  requirement       = "ALTERNATIVE"
+}
+
+resource "keycloak_authentication_subflow" "browser_admin_otp_forms" {
+  realm_id          = keycloak_realm.example.id
+  parent_flow_alias = keycloak_authentication_flow.browser_admin_otp.alias
+  alias             = "browser_admin_otp_forms"
+  provider_id       = "basic-flow"
+  requirement       = "ALTERNATIVE"
+  depends_on        = [keycloak_authentication_execution.browser_admin_otp_cookie]
+}
+
+resource "keycloak_authentication_execution" "browser_admin_otp_password" {
+  realm_id          = keycloak_realm.example.id
+  parent_flow_alias = keycloak_authentication_subflow.browser_admin_otp_forms.alias
+  authenticator     = "auth-username-password-form"
+  requirement       = "REQUIRED"
+}
+
+resource "keycloak_authentication_subflow" "browser_admin_otp_conditional" {
+  realm_id          = keycloak_realm.example.id
+  parent_flow_alias = keycloak_authentication_subflow.browser_admin_otp_forms.alias
+  alias             = "browser_admin_otp_conditional"
+  provider_id       = "basic-flow"
+  requirement       = "CONDITIONAL"
+  depends_on        = [keycloak_authentication_execution.browser_admin_otp_password]
+}
+
+resource "keycloak_authentication_execution" "browser_admin_otp_condition" {
+  realm_id          = keycloak_realm.example.id
+  parent_flow_alias = keycloak_authentication_subflow.browser_admin_otp_conditional.alias
+  authenticator     = "conditional-user-role"
+  requirement       = "REQUIRED"
+}
+
+resource "keycloak_authentication_execution_config" "browser_admin_otp_condition" {
+  realm_id     = keycloak_realm.example.id
+  execution_id = keycloak_authentication_execution.browser_admin_otp_condition.id
+  alias        = "browser_admin_otp_condition"
+  config = {
+    condUserRole = "admin"
+    negate       = "false"
+  }
+}
+
+resource "keycloak_authentication_execution" "browser_admin_otp_otp" {
+  realm_id          = keycloak_realm.example.id
+  parent_flow_alias = keycloak_authentication_subflow.browser_admin_otp_conditional.alias
+  authenticator     = "auth-otp-form"
+  requirement       = "REQUIRED"
+  depends_on        = [keycloak_authentication_execution.browser_admin_otp_condition]
+}
+
+resource "keycloak_authentication_bindings" "browser_admin_otp" {
+  realm_id     = keycloak_realm.example.id
+  browser_flow = keycloak_authentication_flow.browser_admin_otp.alias
+}
+```
+
+Executions are ordered by creation, so `depends_on` keeps them in the right order.
+
 ### Example of IDP Only Browser Flow
 
 ```terraform
@@ -1062,6 +1167,62 @@ resource "keycloak_authentication_bindings" "browser_authentication_binding" {
   browser_flow = keycloak_authentication_flow.idp_only_browser_flow.alias
 }
 ```
+
+## Multi-Factor Authentication (MFA)
+
+MFA asks the user for more than one factor: something they know (password), something they have (phone, security key) or something they are (fingerprint, face). Keycloak supports OTP and WebAuthn (security keys and passkeys) out of the box.
+
+How MFA is enforced is controlled by [flows](#flows) and [required actions](#required-actions):
+
+- The flow decides **when** a factor is asked for (always, only for some users, only for some apps, see [Conditional Flows](#conditional-flows)).
+- The required action (e.g. Configure OTP) makes the user **set up** the factor at the next login. Set it on a user (Users > user > Required user actions), or for all new users (Authentication > Required actions > "Set as default action").
+
+### OTP (One-Time Password)
+
+A 6-digit code from an authenticator app like Google Authenticator, Microsoft Authenticator, FreeOTP or 1Password. The user scans a QR code once, and the app then generates a new code every 30 seconds (TOTP) from a shared secret.
+
+- OTP is already part of the built-in browser flow (`Browser - Conditional OTP`): users who have set up OTP are asked for a code.
+- To make a user set up OTP, add the **Configure OTP** required action to them. The user can also set it up themselves in the Account Console (Account security > Signing in).
+- To require OTP for everyone, set `OTP Form` in the browser flow to Required (in a copy of the flow), or make Configure OTP a default action.
+- Settings (TOTP/HOTP, algorithm, digits, period) are in Authentication > Policies > OTP Policy. Keep the defaults (TOTP, SHA1, 6 digits, 30 s), most apps support only those.
+
+```terraform
+resource "keycloak_realm" "example" {
+  # ...
+  otp_policy {
+    type      = "totp"
+    algorithm = "HmacSHA1"
+    digits    = 6
+    period    = 30
+  }
+}
+```
+
+OTP is phishable: a fake login page can ask for the code and use it right away. WebAuthn and passkeys are not.
+
+### WebAuthn (Security Keys)
+
+WebAuthn (part of FIDO2) uses public-key cryptography with a hardware or platform authenticator: a security key (YubiKey), Touch ID, Face ID or Windows Hello. The private key never leaves the device, and the browser binds each credential to the site's domain, so it **can't be phished**.
+
+As a second factor, after the password:
+
+1. Set up the policy in Authentication > Policies > Webauthn Policy (the defaults are fine for a start, Relying Party ID defaults to the Keycloak hostname).
+2. In a copy of the browser flow, add the `WebAuthn Authenticator` execution to the conditional sub-flow (next to or instead of `OTP Form`).
+3. Users register their key with the **Webauthn Register** required action, or in the Account Console.
+
+WebAuthn needs HTTPS (or `localhost`), and credentials are bound to the domain, so changing the Keycloak hostname invalidates them.
+
+### Passkeys
+
+A passkey is a WebAuthn credential stored on the user's device or in their password manager (iCloud Keychain, Google Password Manager, 1Password, ...), and usually synced between their devices. The user logs in by unlocking the device with fingerprint, face or PIN, with **no password at all**. That is still MFA: the device is something they have, and the biometric or PIN is something they are or know.
+
+Passkeys are fully supported (GA) since Keycloak 26.4 and integrated into the default login form:
+
+1. Enable them in Authentication > Policies > Webauthn Passwordless Policy > **Enable Passkeys**.
+2. Users register a passkey with the **Webauthn Register Passwordless** required action, or in the Account Console (Account security > Signing in > Passkey).
+3. On the login page, the browser offers the passkey (in the username field autofill or with a "Sign in with Passkey" button). Users without a passkey still log in with their password.
+
+Passkeys use the Webauthn **Passwordless** Policy, while security keys as a second factor use the Webauthn Policy, so both can be configured independently.
 
 ## Thank you! & Questions?
 
