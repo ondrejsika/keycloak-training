@@ -17,6 +17,7 @@ services:
       - GF_AUTH_GENERIC_OAUTH_TOKEN_URL=https://sso.sikalabs.com/realms/training/protocol/openid-connect/token
       - GF_AUTH_GENERIC_OAUTH_API_URL=https://sso.sikalabs.com/realms/training/protocol/openid-connect/userinfo
       - GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH=contains(groups[*], 'foo') && 'Admin' || 'Viewer'
+      - GF_AUTH_GENERIC_OAUTH_USE_PKCE=true
       - GF_SERVER_ROOT_URL=http://localhost:3000/
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
