@@ -51,7 +51,7 @@ Keycloak is an open-source identity and access management (IAM) solution develop
 ## Key Features of Keycloak
 
 - Single Sign-On (SSO): Users can log in once and access multiple applications without re-authenticating.
-- Identity Brokering: Supports authentication via third-party identity providers like Google, Microsoft, or LDAP.
+- Identity Brokering: Supports authentication via third-party identity providers like Google, Microsoft, GitHub, or any OIDC/SAML provider.
 - User Federation: Integrates with existing user directories (LDAP, Active Directory).
 - Multi-Factor Authentication (MFA): Supports OTP, WebAuthn, and other MFA mechanisms.
 - Fine-Grained Authorization: Offers Role-Based Access Control (RBAC) and Attribute-Based Access Control (ABAC).
@@ -90,7 +90,7 @@ OAuth 2.0 and OpenID Connect (OIDC) are related but serve different purposes.
 
 - Purpose: Authorization framework.
 - What it does: Allows users to grant third-party applications access to their resources without sharing credentials.
-- Example Use Case: A user logs into a service using "Sign in with Google", granting the app access to their Google Drive files.
+- Example Use Case: A scheduling app asks for permission to read your Google Calendar. You approve the consent screen and the app gets an access token for the Calendar API, without ever getting your Google password (and without learning who you are, which is what OIDC adds).
 - Tokens: Issues an access token that applications use to access APIs on behalf of the user.
 - No Identity Information: OAuth alone does not provide user authentication or identity details.
 
