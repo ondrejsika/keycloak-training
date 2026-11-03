@@ -25,7 +25,7 @@ services:
     command:
       - start
       - --hostname
-      - keycloak.sikademo.com
+      - ${HOST?Environment variable HOST is not set}
       - --proxy-headers
       - xforwarded
       - --http-enabled
@@ -36,7 +36,7 @@ services:
         FROM caddy
         RUN apk add nss-tools
         RUN cat <<EOF > /etc/caddy/Caddyfile
-        keycloak.sikademo.com {
+        ${HOST?Environment variable HOST is not set} {
           reverse_proxy http://keycloak:8080
         }
         EOF
