@@ -321,11 +321,11 @@ https://www.keycloak.org/guides
 See example in [examples/docker_compose](examples/docker_compose)
 
 ```sh
-cd examples/docker-compose
+cd examples/docker_compose
 ```
 
 ```sh
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Install Production Keycloak to Kubernetes using Helm
