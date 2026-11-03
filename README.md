@@ -996,6 +996,280 @@ vim .env
 npm start
 ```
 
+## Identity Providers
+
+Keycloak can let users log in with an account they already have somewhere else: Google, their company's Microsoft Entra ID, another Keycloak, or any other OIDC or SAML provider. This is called **identity brokering**.
+
+Keycloak acts as a client of the external identity provider (IdP), and as the identity provider for your apps. Apps don't know or care where the user came from, they always get Keycloak's tokens, with Keycloak's roles and claims. So you can add or change IdPs without touching the apps.
+
+How the login works:
+
+1. The app redirects the user to Keycloak as usual.
+2. The login page shows a button for each IdP ("Sign in with Google"). The user clicks it and logs in at the IdP.
+3. The IdP redirects back to Keycloak's broker endpoint, `https://keycloak.sikademo.com/realms/<realm>/broker/<alias>/endpoint`. This is the redirect URI to register at the IdP.
+4. On the first login, Keycloak creates or links a local user (the [First Broker Login flow](#first-broker-login)). On later logins it finds the user by the IdP link.
+5. Keycloak issues its own tokens to the app.
+
+Identity providers are in Identity providers in the Admin Console. Supported types:
+
+- Social providers with built-in support: Google, GitHub, Microsoft, Facebook, GitLab, Apple, LinkedIn, ...
+- Any **OpenID Connect** provider (e.g. another Keycloak, Microsoft Entra ID, Okta, Auth0).
+- Any **SAML 2.0** provider (e.g. ADFS). Import its metadata (entity descriptor) URL or file.
+
+To skip the login page and go straight to one IdP, the app adds `kc_idp_hint=<alias>` to the authorization request, or the browser flow uses the Identity Provider Redirector (see [Example of IDP Only Browser Flow](#example-of-idp-only-browser-flow)).
+
+LDAP and Active Directory are not identity providers in Keycloak, they are [User Federation](https://www.keycloak.org/docs/latest/server_admin/#_user-storage-federation): users still type their password into Keycloak's login page, and Keycloak checks it against LDAP.
+
+### Google
+
+1. In Google Cloud Console > APIs & Services > Credentials, create an **OAuth client ID** of type Web application.
+2. Set Authorized redirect URI to `https://keycloak.sikademo.com/realms/example/broker/google/endpoint`.
+3. In Keycloak, add Identity providers > Google with the client ID and secret.
+
+```terraform
+resource "keycloak_oidc_google_identity_provider" "google" {
+  realm         = keycloak_realm.example.id
+  client_id     = "<client id>.apps.googleusercontent.com"
+  client_secret = "<client secret>"
+  trust_email   = true
+  hosted_domain = "example.com" # optional, allow only one Google Workspace domain
+  sync_mode     = "IMPORT"
+}
+```
+
+`hosted_domain` restricts the login to users of one Google Workspace domain. Without it, any Google account can log in (and get a Keycloak user).
+
+### Microsoft Entra ID
+
+Entra ID (formerly Azure AD) is a standard OpenID Connect provider. For a company tenant, add it as an **OpenID Connect v1.0** provider. Keycloak's built-in "Microsoft" social provider is for any Microsoft account (personal and all tenants), which is usually not what you want for employees.
+
+1. In the Entra admin center > App registrations, create a **New registration**, Supported account types: "Accounts in this organizational directory only" (single tenant).
+2. Set Redirect URI, platform Web, to `https://keycloak.sikademo.com/realms/example/broker/entra/endpoint`.
+3. Copy the **Application (client) ID** and **Directory (tenant) ID** from Overview.
+4. In Certificates & secrets, create a **New client secret** and copy its Value (not the Secret ID). Secrets expire (max 24 months), so plan to rotate them.
+5. Optional: in Token configuration, **Add groups claim** (Security groups) to get the user's groups in the `groups` claim, and add the `email` optional claim.
+6. In Keycloak, add Identity providers > OpenID Connect v1.0 with alias `entra`, and paste the discovery URL `https://login.microsoftonline.com/<tenant id>/v2.0/.well-known/openid-configuration` into Discovery endpoint to fill in the rest.
+
+```terraform
+locals {
+  entra_tenant_id = "00000000-0000-0000-0000-000000000000" # Directory (tenant) ID
+}
+
+resource "keycloak_oidc_identity_provider" "entra" {
+  realm              = keycloak_realm.example.id
+  alias              = "entra"
+  display_name       = "Microsoft Entra ID"
+  client_id          = "<application (client) id>"
+  client_secret      = "<client secret value>"
+  authorization_url  = "https://login.microsoftonline.com/${local.entra_tenant_id}/oauth2/v2.0/authorize"
+  token_url          = "https://login.microsoftonline.com/${local.entra_tenant_id}/oauth2/v2.0/token"
+  logout_url         = "https://login.microsoftonline.com/${local.entra_tenant_id}/oauth2/v2.0/logout"
+  jwks_url           = "https://login.microsoftonline.com/${local.entra_tenant_id}/discovery/v2.0/keys"
+  issuer             = "https://login.microsoftonline.com/${local.entra_tenant_id}/v2.0"
+  user_info_url      = "https://graph.microsoft.com/oidc/userinfo"
+  validate_signature = true
+  default_scopes     = "openid profile email"
+  trust_email        = false # Entra doesn't guarantee that the email claim is verified
+  sync_mode          = "FORCE"
+  extra_config = {
+    pkceEnabled = "true"
+    pkceMethod  = "S256"
+  }
+}
+
+# Members of an Entra group get the "editor" role. Entra sends group object IDs, not names.
+resource "keycloak_custom_identity_provider_mapper" "entra_group_to_editor" {
+  realm                    = keycloak_realm.example.id
+  name                     = "entra-group-to-editor"
+  identity_provider_alias  = keycloak_oidc_identity_provider.entra.alias
+  identity_provider_mapper = "oidc-role-idp-mapper"
+  extra_config = {
+    syncMode      = "FORCE"
+    claim         = "groups"
+    "claim.value" = "11111111-1111-1111-1111-111111111111" # Entra group object ID
+    role          = "editor"
+  }
+}
+```
+
+Things specific to Entra:
+
+- **Don't trust the email.** The `email` claim can be unverified or changed by the user in some setups, so keep Trust Email off and don't link existing users by email automatically (this is the "nOAuth" issue). The stable identifier is the `oid` (or `sub`) claim, which Keycloak uses for the IdP link.
+- **Groups are object IDs**, not names (e.g. `11111111-...`). Map them with Claim to Role / Advanced Claim to Group using the ID from the group's Overview page. A user in more than 200 groups gets no `groups` claim at all (group overage), so assign only the groups the app needs ("Groups assigned to the application").
+- The access token from Entra is for Microsoft Graph, not for your app. Keycloak only uses the ID token and the UserInfo endpoint to create the user, and your apps get Keycloak's tokens as usual.
+
+### Another Keycloak (OpenID Connect)
+
+Any Keycloak realm can be an IdP for another realm, the same way as any other OIDC provider. Common setups: a central company realm with all employees, and separate realms for products or customers that broker to it.
+
+Here realm `example2` lets users log in with their account from realm `example`:
+
+```terraform
+# In realm "example" (the IdP): a client for realm "example2"
+resource "keycloak_openid_client" "example2_broker" {
+  realm_id              = keycloak_realm.example.id
+  client_id             = "example2_broker"
+  client_secret         = "example" # demo only, keep real secrets out of Git
+  access_type           = "CONFIDENTIAL"
+  standard_flow_enabled = true
+  valid_redirect_uris   = ["https://keycloak.sikademo.com/realms/example2/broker/example/endpoint"]
+}
+
+# In realm "example2" (the broker): realm "example" as an identity provider
+resource "keycloak_oidc_identity_provider" "example2" {
+  realm              = keycloak_realm.example2.id
+  alias              = "example"
+  display_name       = "Example SSO"
+  client_id          = keycloak_openid_client.example2_broker.client_id
+  client_secret      = keycloak_openid_client.example2_broker.client_secret
+  authorization_url  = "https://keycloak.sikademo.com/realms/example/protocol/openid-connect/auth"
+  token_url          = "https://keycloak.sikademo.com/realms/example/protocol/openid-connect/token"
+  user_info_url      = "https://keycloak.sikademo.com/realms/example/protocol/openid-connect/userinfo"
+  logout_url         = "https://keycloak.sikademo.com/realms/example/protocol/openid-connect/logout"
+  jwks_url           = "https://keycloak.sikademo.com/realms/example/protocol/openid-connect/certs"
+  issuer             = "https://keycloak.sikademo.com/realms/example"
+  validate_signature = true
+  default_scopes     = "openid profile email"
+  trust_email        = true
+  sync_mode          = "IMPORT"
+  extra_config = {
+    pkceEnabled = "true"
+    pkceMethod  = "S256"
+  }
+}
+```
+
+In the Admin Console, you can fill in all the URLs at once: paste the realm's discovery URL (`https://keycloak.sikademo.com/realms/example/.well-known/openid-configuration`) into Discovery endpoint.
+
+### Identity Provider Settings
+
+Settings worth knowing (on the IdP in Identity providers):
+
+- **Trust Email** – trust that the IdP verified the user's email, so Keycloak marks it as verified and doesn't ask the user to verify it again. Only for IdPs that really verify emails (Google yes, a random OIDC provider maybe not).
+- **Sync mode** – when to update the Keycloak user from the IdP:
+  - Import – only on the first login. The user can then change their data in Keycloak.
+  - Force – on every login, so data from the IdP always wins.
+  - Legacy – the old behavior, decided by each mapper.
+- **First login flow override** – the flow to run on the first login through this IdP, default `first broker login`.
+- **Post login flow** – a flow to run after every login through this IdP, e.g. to require OTP even after a Google login.
+- **Hide on login page** – no button, only reachable with `kc_idp_hint`.
+- **Store tokens** – keep the IdP's tokens, so the app can get them (e.g. to call the Google or Microsoft Graph API for the user) from `/realms/<realm>/broker/<alias>/token`. Needs the `broker` client's `read-token` role.
+- **Account linking** – an existing user can link more IdPs in the Account Console (Account security > Linked accounts).
+
+### Identity Provider Mappers
+
+Mappers (IdP > Mappers tab) turn the IdP's claims (OIDC) or attributes (SAML) into Keycloak user data: username, attributes, roles and groups. Common mappers:
+
+- **Username Template Importer** – builds the username, e.g. `${ALIAS}.${CLAIM.preferred_username}`, so users from different IdPs never collide.
+- **Attribute Importer** – copies a claim into a user attribute (or `email`, `firstName`, `lastName`). For social providers that aren't OIDC (e.g. Facebook), the source is a field from the provider's JSON profile ("Social Profile JSON Field Path").
+- **Hardcoded Role** / **Hardcoded Group** / **Hardcoded Attribute** – every user from this IdP gets it, e.g. a `partner` role for everyone from a partner's IdP.
+- **Claim to Role** / **Advanced Claim to Role** – give a role if the claim has a value, e.g. the IdP's `admin` role becomes the local `editor` role. **Advanced Claim to Group** does the same for groups.
+- SAML: **SAML Attribute to Role**, **XPath Attribute Importer**.
+
+Each mapper has its own Sync mode: Inherit (use the IdP's setting), Import or Force. Use Force for anything that controls access (roles, groups), so that removing a role at the IdP also removes it in Keycloak at the next login.
+
+```terraform
+# Username "example.<preferred_username>", so it never collides with local users
+resource "keycloak_user_template_importer_identity_provider_mapper" "example2_username" {
+  realm                   = keycloak_realm.example2.id
+  name                    = "username"
+  identity_provider_alias = keycloak_oidc_identity_provider.example2.alias
+  template                = "$${ALIAS}.$${CLAIM.preferred_username}"
+  extra_config = {
+    syncMode = "INHERIT"
+  }
+}
+
+# Copy the "department" claim into the "department" user attribute, on every login
+resource "keycloak_attribute_importer_identity_provider_mapper" "example2_department" {
+  realm                   = keycloak_realm.example2.id
+  name                    = "department"
+  identity_provider_alias = keycloak_oidc_identity_provider.example2.alias
+  claim_name              = "department"
+  user_attribute          = "department"
+  extra_config = {
+    syncMode = "FORCE"
+  }
+}
+
+# Users from the "example" realm who have its "admin" realm role get "editor" here
+resource "keycloak_custom_identity_provider_mapper" "example2_admin_to_editor" {
+  realm                    = keycloak_realm.example2.id
+  name                     = "admin-to-editor"
+  identity_provider_alias  = keycloak_oidc_identity_provider.example2.alias
+  identity_provider_mapper = "oidc-role-idp-mapper"
+  extra_config = {
+    syncMode      = "FORCE"
+    claim         = "realm_access.roles"
+    "claim.value" = "admin"
+    role          = keycloak_role.editor.name
+  }
+}
+
+# Every user from this IdP gets the "editor" role
+resource "keycloak_hardcoded_role_identity_provider_mapper" "example2_editor" {
+  realm                   = keycloak_realm.example2.id
+  name                    = "editor"
+  identity_provider_alias = keycloak_oidc_identity_provider.example2.alias
+  role                    = keycloak_role.editor.name
+  extra_config = {
+    syncMode = "INHERIT"
+  }
+}
+```
+
+### First Broker Login
+
+The `first broker login` flow runs the first time a user logs in through an IdP, before any local user is linked to the IdP account. It decides whether to **create** a new user or **link** an existing one. The default flow (simplified):
+
+```
+first broker login
+├── Review Profile                                   REQUIRED
+└── User creation or linking                         REQUIRED
+    ├── Create User If Unique                        ALTERNATIVE
+    └── Handle Existing Account                      ALTERNATIVE
+        ├── Confirm link existing account            REQUIRED
+        └── Account verification options             REQUIRED
+            ├── Verify existing account by Email     ALTERNATIVE
+            └── Verify Existing Account By Re-authentication  ALTERNATIVE
+```
+
+1. **Review Profile** – shows the profile form so the user can fill in data the IdP didn't send. By default (`update.profile.on.first.login = missing`) only if something required is missing.
+2. **Create User If Unique** – creates a new local user, if no user with the same username or email exists.
+3. **Handle Existing Account** – a user with the same email already exists (e.g. they registered with a password before). Keycloak asks the user to confirm the link, and then to prove they own the existing account: by clicking a link sent to the email, or by logging in with the existing account's password (and OTP).
+
+The verification step is important: without it, anyone who can create an account at an IdP with your email address could take over your Keycloak account.
+
+The resulting link is visible in the user's Identity provider links tab.
+
+#### Example: Automatically Link Existing Users
+
+When the IdP is fully trusted (e.g. your company's own Keycloak, where emails are verified and can't be chosen by the user; not Entra ID, see [its email caveat](#microsoft-entra-id)), you can skip the confirmation and link users with the same email automatically. Set the IdP's First login flow override to this flow (`first_broker_login_flow_alias = keycloak_authentication_flow.first_broker_login_auto_link.alias` in Terraform):
+
+```terraform
+resource "keycloak_authentication_flow" "first_broker_login_auto_link" {
+  realm_id = keycloak_realm.example2.id
+  alias    = "first_broker_login_auto_link"
+}
+
+resource "keycloak_authentication_execution" "first_broker_login_auto_link_create" {
+  realm_id          = keycloak_realm.example2.id
+  parent_flow_alias = keycloak_authentication_flow.first_broker_login_auto_link.alias
+  authenticator     = "idp-create-user-if-unique"
+  requirement       = "ALTERNATIVE"
+}
+
+resource "keycloak_authentication_execution" "first_broker_login_auto_link_link" {
+  realm_id          = keycloak_realm.example2.id
+  parent_flow_alias = keycloak_authentication_flow.first_broker_login_auto_link.alias
+  authenticator     = "idp-auto-link"
+  requirement       = "ALTERNATIVE"
+  depends_on        = [keycloak_authentication_execution.first_broker_login_auto_link_create]
+}
+```
+
+> **Security:** Use automatic linking only with IdPs you fully trust to verify emails. With an IdP where users can set any email (or with a misconfigured one), it lets an attacker take over any existing account by its email address.
+
 ## Flows
 
 In Keycloak, flows are authentication processes that define how users authenticate and interact with Keycloak during login, registration, and other identity-related actions. These flows are highly customizable and consist of multiple execution steps, allowing for complex authentication and authorization scenarios.
@@ -1007,7 +1281,7 @@ In Keycloak, flows are authentication processes that define how users authentica
 - Registration Flow – Defines how user registration is handled.
 - Reset Credentials Flow – Manages the process of resetting user credentials (e.g., forgotten passwords).
 - Client Authentication Flow – Used for authenticating clients (applications) to Keycloak.
-- First Broker Login Flow – Runs the first time a user logs in through an external identity provider (e.g., Google, GitHub, another OIDC/SAML IdP), to create or link the Keycloak account. (LDAP is User Federation, not an identity provider, so this flow is not used for it.)
+- First Broker Login Flow – Runs the first time a user logs in through an external identity provider (e.g., Google, GitHub, another OIDC/SAML IdP), to create or link the Keycloak account, see [First Broker Login](#first-broker-login). (LDAP is User Federation, not an identity provider, so this flow is not used for it.)
 - Docker Authentication Flow – Used for authenticating to a Docker registry with Keycloak as its auth server.
 
 ### Required Actions
