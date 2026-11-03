@@ -617,7 +617,7 @@ resource "keycloak_user_groups" "ondrej" {
 
 ### Assign Role to User
 
-```
+```terraform
 resource "keycloak_user_roles" "ondrej" {
   realm_id = keycloak_realm.example.id
   user_id  = keycloak_user.ondrej.id
@@ -630,7 +630,7 @@ resource "keycloak_user_roles" "ondrej" {
 
 ### Assign Role to Group
 
-```
+```terraform
 resource "keycloak_group_roles" "team-a" {
   realm_id = keycloak_realm.example.id
   group_id = keycloak_group.team-a.id
