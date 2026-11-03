@@ -21,7 +21,7 @@ __Freelance DevOps Engineer, Consultant & Lecturer__
 
 Feel free to star this repository or fork it.
 
-If you found bug, create issue or pull request.
+If you find a bug, create an issue or pull request.
 
 Also feel free to propose improvements by creating issues.
 
