@@ -603,6 +603,12 @@ Clients are applications that can request authentication from Keycloak. Clients 
 
 ### Test Direct Access Grants
 
+Direct Access Grants is Keycloak's name for the OAuth 2.0 Resource Owner Password Credentials (ROPC) grant (`grant_type=password`): the client sends the user's username and password straight to the token endpoint. The client needs "Direct access grants" enabled.
+
+> **Note:** ROPC is deprecated (OAuth 2.0 Security Best Current Practice) and removed in OAuth 2.1. The app sees the user's password, and the grant bypasses the login page, so MFA, identity providers and required actions don't apply. Use it only for testing and scripts like these, and use the Authorization Code flow (with PKCE) in real apps.
+
+Plain OAuth 2.0 request, returns `access_token` and `refresh_token` only:
+
 ```sh
 curl -X POST "https://keycloak.sikademo.com/realms/test/protocol/openid-connect/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
@@ -612,6 +618,8 @@ curl -X POST "https://keycloak.sikademo.com/realms/test/protocol/openid-connect/
   -d "username=user" \
   -d "password=a"
 ```
+
+With `scope=openid` the request becomes an OpenID Connect request, so the response also contains an `id_token` (a JWT with the user's identity). Without `openid`, Keycloak returns no ID token and the UserInfo endpoint rejects the access token.
 
 ```sh
 curl -X POST "https://keycloak.sikademo.com/realms/test/protocol/openid-connect/token" \
