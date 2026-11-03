@@ -20,8 +20,8 @@ spec:
         host: hello-sso-admins.k8s.sikademo.com
         TEXT: "Admins!"
         ingressExtraAnnotations:
-          nginx.ingress.kubernetes.io/auth-url: "https://oauth2-proxy-admins.k8s.sikademo.com/oauth2/auth"
-          nginx.ingress.kubernetes.io/auth-signin: "https://oauth2-proxy-admins.k8s.sikademo.com/oauth2/start?rd=https://$host$request_uri"
+          nginx.ingress.kubernetes.io/auth-url: "https://oauth2-proxy.k8s.sikademo.com/oauth2/auth?allowed_groups=/admins"
+          nginx.ingress.kubernetes.io/auth-signin: "https://oauth2-proxy.k8s.sikademo.com/oauth2/start?rd=https://$host$request_uri"
   syncPolicy:
     automated:
       prune: true

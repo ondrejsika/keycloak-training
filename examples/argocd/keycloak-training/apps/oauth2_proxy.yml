@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: oauth2-proxy-admins
+  name: oauth2-proxy
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -18,38 +18,43 @@ spec:
     - CreateNamespace=true
   source:
     repoURL: https://oauth2-proxy.github.io/manifests
-    targetRevision: 6.10.1
+    targetRevision: 10.7.1
     chart: oauth2-proxy
     helm:
-      releaseName: admins
+      releaseName: oauth2-proxy
       valuesObject:
         # https://github.com/oauth2-proxy/manifests/blob/main/helm/oauth2-proxy/values.yaml
         config:
           clientID: "oauth2_proxy"
           clientSecret: "example"
-          # Generate cookieSecret using `openssl rand -base64 32 | head -c 32 | base64`
+          # Demo only: secrets are committed in plain text. In real use, generate
+          # your own cookieSecret using `openssl rand -base64 32 | head -c 32 | base64`
+          # and store secrets outside of Git (config.existingSecret).
           cookieSecret: "VWZ4VnJzaEZZQXkrYmJIdUxDeFFUTGkza3NqSHhOTWk="
           configFile: |-
             # https://github.com/oauth2-proxy/oauth2-proxy/blob/master/contrib/local-environment/oauth2-proxy-keycloak.cfg
             email_domains=["*"]
-            cookie_secure="false"
+            cookie_name="_oauth2_proxy_sikademo"
+            cookie_secure=true
             cookie_domains=[".sikademo.com"]
             whitelist_domains=[".sikademo.com"]
-            redirect_url="https://oauth2-proxy-admins.k8s.sikademo.com/oauth2/callback"
+            redirect_url="https://oauth2-proxy.k8s.sikademo.com/oauth2/callback"
             provider="keycloak-oidc"
             oidc_issuer_url="https://keycloak.sikademo.com/realms/example"
-            allowed_groups=["/admins"]
+            # No global allowed_groups: any user of the realm can log in. Each
+            # protected app checks groups itself through its nginx auth-url,
+            # e.g. /oauth2/auth?allowed_groups=/admins (see hello_sso_*.yml).
         ingress:
           enabled: true
           className: nginx
           path: /
           hosts:
-            - oauth2-proxy-admins.k8s.sikademo.com
+            - oauth2-proxy.k8s.sikademo.com
           annotations:
             cert-manager.io/cluster-issuer: letsencrypt
             nginx.ingress.kubernetes.io/proxy-body-size: 512m
             nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
           tls:
-            - secretName: oauth2-proxy-admins
+            - secretName: oauth2-proxy
               hosts:
-                - oauth2-proxy-admins.k8s.sikademo.com
+                - oauth2-proxy.k8s.sikademo.com
