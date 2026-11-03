@@ -324,9 +324,19 @@ See example in [examples/docker_compose](examples/docker_compose)
 cd examples/docker_compose
 ```
 
+Set `HOST` to the domain where Keycloak will be available. Caddy gets a Let's Encrypt certificate for it, so the domain must point to the server and ports 80 and 443 must be reachable from the internet.
+
 ```sh
-docker compose up -d
+HOST=keycloak.docker.sikademo.com docker compose up -d
 ```
+
+For a local try, use `HOST=localhost`. Caddy then issues a certificate from its own internal CA, which the browser will not trust (accept the warning).
+
+```sh
+HOST=localhost docker compose up -d
+```
+
+Keycloak will be available on `https://$HOST`. Admin user is `admin` and password is `admin`.
 
 ## Install Production Keycloak to Kubernetes
 
