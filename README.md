@@ -84,7 +84,7 @@ In OIDC & Keycloak, authentication happens via OpenID Connect (OIDC), while auth
 
 ## OAuth 2.0 vs OpenID Connect (OIDC)
 
-OAuth 2.0 and OpenID Connect (OIDC) are related but serve different purposes
+OAuth 2.0 and OpenID Connect (OIDC) are related but serve different purposes.
 
 ### OAuth 2.0
 
@@ -111,13 +111,13 @@ If you're building a system that requires logging in users securely, you should 
 
 ## JWT (JSON Web Token)
 
-JSON Web Token (JWT) is an open standard (RFC 7519) that defines a compact, URL safe, and self-contained way for securely transmitting information between parties as a JSON object. This information can be verified and trusted because it is digitally signed.
+JSON Web Token (JWT) is an open standard (RFC 7519) that defines a compact, URL-safe, and self-contained way for securely transmitting information between parties as a JSON object. This information can be verified and trusted because it is digitally signed.
 
 It is commonly used for authentication and authorization in web applications.
 
 ### Structure of JWT
 
-A JWT consists of three parts, separated by dots (`.`)
+A JWT consists of three parts, separated by dots (`.`):
 
 1. Header – Contains metadata, such as the token type (JWT) and signing algorithm (e.g., HS256, RS256).
 2. Payload – Contains claims (statements about the user or token), such as user ID, roles, or expiration time.
@@ -180,7 +180,7 @@ OAuth 2.0 defines several types of tokens used for different purposes in the aut
 ### Access Token
 
 - Grants access to protected resources on behalf of the user.
-- Sent in API requests (e.g., Authorization: Bearer <token>).
+- Sent in API requests (e.g., `Authorization: Bearer <token>`).
 - Typically short-lived for security reasons.
 - Format varies (JWT, opaque string, etc.), depending on the authorization server.
 
@@ -204,7 +204,7 @@ In OpenID Connect (OIDC), which is an identity layer built on top of OAuth2, add
 - Includes claims such as sub (subject/user ID), email, name, iat (issued at), and exp (expiration).
 - Used by the client to verify the user's identity.
 
-In summary
+In summary:
 
 - OAuth2 focuses on authorization (who can access what).
 - OIDC adds authentication (who the user is) with ID tokens.
@@ -440,7 +440,7 @@ Realm is a container for users, credentials, roles, groups and other entities. E
 
 ### Create Realm from UI
 
-Go to <https://keycloak.sikademo.com> and login as `admin` with password `admin`. Click on `Add realm` button and fill the form.
+Go to <https://keycloak.sikademo.com> and login as `admin` with password `admin`. Click on `Create realm` button and fill the form.
 
 ### Create Realm using Terraform
 
@@ -549,7 +549,7 @@ resource "keycloak_user" "ondrej" {
 
 ### What is Role
 
-Roles and groups have a similar purpose, which is to give users access and permissions to use applications. Groups are a collection of users to which you apply roles and attributes. Roles define specific applications permissions and access control.
+Roles and groups have a similar purpose, which is to give users access and permissions to use applications. Groups are a collection of users to which you apply roles and attributes. Roles define application-specific permissions and access control.
 
 A role typically applies to one type of user. For example, an organization may include admin, user, manager, and employee roles. An application can assign access and permissions to a role and then assign multiple users to that role so the users have the same access and permissions. For example, the Admin Console has roles that give permission to users to access different parts of the Admin Console.
 
@@ -575,7 +575,7 @@ resource "keycloak_role" "viewer" {
 
 ### What is Group
 
-Groups are a collection of users to which you apply roles and attributes. Roles define specific applications permissions and access control.
+Groups are a collection of users to which you apply roles and attributes. Roles define application-specific permissions and access control.
 
 ### Create Group from UI
 
@@ -763,7 +763,7 @@ resource "keycloak_openid_client_default_scopes" "example" {
 
 ## Optional Client Scopes
 
-Must be requested by the client
+Must be requested by the client.
 
 ```terraform
 resource "keycloak_openid_client_optional_scopes" "example" {
@@ -833,7 +833,7 @@ In Keycloak, flows are authentication processes that define how users authentica
 
 ### Flow Structure
 
-Each flow consists of authentication executions, which are steps in the flow. These executions can be
+Each flow consists of authentication executions, which are steps in the flow. These executions can be:
 
 - Required – Must be executed for authentication to proceed.
 - Alternative – Can be skipped if another option is available.
