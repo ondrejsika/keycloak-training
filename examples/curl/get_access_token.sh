@@ -9,5 +9,5 @@ RESPONSE=$(curl -sSL -X POST "https://sso.sikalabs.com/realms/training/protocol/
   -d "password=example_password" )
 
 echo RAW RESPONSE:
-echo $RESPONSE | jq
+echo "$RESPONSE" | jq
 echo
