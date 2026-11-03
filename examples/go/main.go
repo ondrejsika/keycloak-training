@@ -110,12 +110,8 @@ func Server(issuer, clientID, clientSecret string) {
 		}
 		_ = accessToken // Access Token is now verified and can be used
 
-		refreshToken, err := provider.Verifier(&oidc.Config{ClientID: clientID}).Verify(ctx, rawIDToken)
-		if err != nil {
-			http.Error(w, "Failed to verify Refresh Token: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		_ = refreshToken // Refresh Token is now verified and can be used
+		// Refresh Token is not verified, it is signed by Keycloak using a symmetric
+		// key (HS512) and it is not intended to be validated by the client
 	})
 
 	fmt.Println("http://localhost:8000/")
