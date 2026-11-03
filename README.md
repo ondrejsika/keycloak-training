@@ -883,6 +883,12 @@ The `refresh_token` in the response is now an offline token.
 
 ## Client Scopes
 
+A client scope is a reusable set of [protocol mappers](#protocol-mappers) (which claims go into the token) and role scope mappings, shared by many clients. Instead of configuring the same mappers on every client, you create a scope once (e.g. `groups`) and assign it to the clients that need it, as a [default](#default-client-scopes) or [optional](#optional-client-scopes) scope.
+
+Keycloak has built-in scopes: `openid`, `profile`, `email`, `address`, `phone`, `roles`, `web-origins`, `acr`, `basic`, `offline_access`, ... (Client scopes in the Admin Console).
+
+A new scope, `groups`. `include_in_token_scope` puts its name into the token's `scope` claim, so an API can see the client asked for it:
+
 ```terraform
 resource "keycloak_openid_client_scope" "example_groups" {
   realm_id               = keycloak_realm.example.id
@@ -890,6 +896,8 @@ resource "keycloak_openid_client_scope" "example_groups" {
   include_in_token_scope = true
 }
 ```
+
+Reference an existing (built-in) scope, `roles`, to add a mapper to it:
 
 ```terraform
 data "keycloak_openid_client_scope" "example_roles" {
@@ -933,6 +941,8 @@ resource "keycloak_openid_user_realm_role_protocol_mapper" "example_roles" {
 
 ## Default Client Scopes
 
+Default scopes are always applied: their claims are in every token for the client, without the client asking for them.
+
 ```terraform
 resource "keycloak_openid_client_default_scopes" "example" {
   realm_id  = keycloak_realm.example.id
@@ -948,7 +958,7 @@ resource "keycloak_openid_client_default_scopes" "example" {
 
 ## Optional Client Scopes
 
-Must be requested by the client.
+Optional scopes are applied only when the client asks for them in the `scope` parameter of the login (or token) request, e.g. `scope=openid groups`. Use them for data that only some requests need, like `offline_access` or `phone`.
 
 ```terraform
 resource "keycloak_openid_client_optional_scopes" "example" {
