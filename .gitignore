@@ -32,7 +32,5 @@ override.tf
 
 # NodeJS
 node_modules
-
-# NodeJS
 .next
 out
