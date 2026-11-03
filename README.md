@@ -504,7 +504,7 @@ resource "keycloak_realm" "example" {
 
 ### Create User from UI
 
-You can add user here <https://keycloak.sikademo.com/admin/example/console/#/example/users>
+You can add user here <https://keycloak.sikademo.com/admin/master/console/#/example/users>
 
 ### Create User using Terraform
 
