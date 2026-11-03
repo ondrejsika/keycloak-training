@@ -21,7 +21,7 @@ var FlagEntityID string
 
 var Cmd = &cobra.Command{
 	Use:   "example-saml",
-	Short: "Examle SAML",
+	Short: "Example SAML",
 	Run: func(cmd *cobra.Command, args []string) {
 		Server(FlagCert, FlagKey, FlagMetadataURL, FlagEntityID)
 	},
