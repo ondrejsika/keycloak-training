@@ -54,7 +54,7 @@ Keycloak is an open-source identity and access management (IAM) solution develop
 - Identity Brokering: Supports authentication via third-party identity providers like Google, Microsoft, GitHub, or any OIDC/SAML provider.
 - User Federation: Integrates with existing user directories (LDAP, Active Directory).
 - Multi-Factor Authentication (MFA): Supports OTP, WebAuthn, and other MFA mechanisms.
-- Fine-Grained Authorization: Offers Role-Based Access Control (RBAC) and Attribute-Based Access Control (ABAC).
+- Fine-Grained Authorization: Offers Role-Based Access Control (RBAC) and Attribute-Based Access Control (ABAC), see [Authorization Services](#authorization-services).
 - Protocol Support: Works with OpenID Connect (OIDC) and SAML.
 - Admin UI, API, and Terraform: Provides an easy-to-use management interface and REST APIs for automation.
 - Self-Service Account Management: Users can manage their profiles, passwords, and sessions.
@@ -954,6 +954,193 @@ resource "keycloak_openid_client_optional_scopes" "example" {
   ]
 }
 ```
+
+## Authorization Services
+
+Roles and groups in the token (RBAC) are enough for most apps: the app reads `realm_access.roles` and decides itself. Keycloak Authorization Services go further: the app asks **Keycloak** "can this user do X with resource Y?", and Keycloak decides based on central policies. This is how Keycloak supports fine-grained authorization, including ABAC (decisions based on user attributes, time, client, ...) and UMA (users sharing their own resources).
+
+Use it when authorization rules change often, are shared by several services, or must be managed by admins without redeploying apps. It adds complexity and an extra call to Keycloak, so start with RBAC if that is enough.
+
+### Concepts
+
+Authorization Services are enabled per client. That client is the **resource server** (the API being protected), and has these parts (Client > Authorization tab):
+
+- **Resource** – what is protected: an object or a group of objects, e.g. `documents` with URI `/documents/*`. A resource can have a type, an owner and attributes.
+- **Scope** – what can be done with a resource, e.g. `view`, `edit`, `delete`.
+- **Policy** – a condition that is true or false, independent of any resource, e.g. "user has role `editor`", "user is in group `team-a`", "it's a working day". Policies can be combined (aggregated policy).
+- **Permission** – connects resources and/or scopes with policies: "to `edit` `documents`, policies X and Y must be true". A permission is either resource-based (the whole resource) or scope-based (one action on it).
+
+Built-in policy types:
+
+- Role, Group, User, Client, Client Scope – RBAC style, who the user is or which app is calling.
+- Time – allow only in a time window (e.g. office hours).
+- Regex – match a claim of the token (e.g. `email` ending with `@example.com`), a simple ABAC.
+- Aggregated – combines other policies.
+- JavaScript – custom logic. For security reasons it can't be written in the Admin Console, it must be [deployed as a JAR](https://www.keycloak.org/docs/latest/server_development/#_script_providers).
+
+Each permission (and aggregated policy) has a **decision strategy**:
+
+- Unanimous – all policies must be true (AND).
+- Affirmative – at least one policy must be true (OR).
+- Consensus – more true than false.
+
+### Enable Authorization Services
+
+Client > Capability config > Client authentication **ON** and Authorization **ON**. The client must be confidential.
+
+In Client > Authorization > Settings, the **Policy enforcement mode**:
+
+- Enforcing (default) – requests are denied if no policy grants access, also for resources without any permission.
+- Permissive – requests are allowed when a resource has no permissions.
+- Disabled – no evaluation, everything is allowed.
+
+Use Client > Authorization > **Evaluate** to test which permissions a given user gets, without writing any code.
+
+### Example: Documents API
+
+Users with the `viewer` or `editor` role can view documents. Only `editor`s in the group `team-a` can edit them (roles and group from [Roles](#roles) and [Groups](#groups)).
+
+```terraform
+resource "keycloak_openid_client" "documents_api" {
+  realm_id                 = keycloak_realm.example.id
+  client_id                = "documents_api"
+  client_secret            = "example" # demo only, keep real secrets out of Git
+  access_type              = "CONFIDENTIAL"
+  service_accounts_enabled = true # required for Authorization Services
+
+  authorization {
+    policy_enforcement_mode = "ENFORCING"
+    decision_strategy       = "UNANIMOUS"
+  }
+}
+
+# Scopes: what can be done with a resource
+resource "keycloak_openid_client_authorization_scope" "view" {
+  realm_id           = keycloak_realm.example.id
+  resource_server_id = keycloak_openid_client.documents_api.resource_server_id
+  name               = "view"
+}
+
+resource "keycloak_openid_client_authorization_scope" "edit" {
+  realm_id           = keycloak_realm.example.id
+  resource_server_id = keycloak_openid_client.documents_api.resource_server_id
+  name               = "edit"
+}
+
+# Resource: what is protected
+resource "keycloak_openid_client_authorization_resource" "documents" {
+  realm_id           = keycloak_realm.example.id
+  resource_server_id = keycloak_openid_client.documents_api.resource_server_id
+  name               = "documents"
+  type               = "urn:documents_api:resources:document"
+  uris               = ["/documents/*"]
+  scopes = [
+    keycloak_openid_client_authorization_scope.view.name,
+    keycloak_openid_client_authorization_scope.edit.name,
+  ]
+}
+
+# Policies: who (conditions, no resources here)
+resource "keycloak_openid_client_role_policy" "is_viewer" {
+  realm_id           = keycloak_realm.example.id
+  resource_server_id = keycloak_openid_client.documents_api.resource_server_id
+  name               = "is_viewer"
+  type               = "role"
+  logic              = "POSITIVE"
+  decision_strategy  = "UNANIMOUS"
+  role {
+    id       = keycloak_role.viewer.id
+    required = true
+  }
+}
+
+resource "keycloak_openid_client_role_policy" "is_editor" {
+  realm_id           = keycloak_realm.example.id
+  resource_server_id = keycloak_openid_client.documents_api.resource_server_id
+  name               = "is_editor"
+  type               = "role"
+  logic              = "POSITIVE"
+  decision_strategy  = "UNANIMOUS"
+  role {
+    id       = keycloak_role.editor.id
+    required = true
+  }
+}
+
+resource "keycloak_openid_client_group_policy" "in_team_a" {
+  realm_id           = keycloak_realm.example.id
+  resource_server_id = keycloak_openid_client.documents_api.resource_server_id
+  name               = "in_team_a"
+  logic              = "POSITIVE"
+  decision_strategy  = "UNANIMOUS"
+  groups {
+    id              = keycloak_group.team-a.id
+    path            = keycloak_group.team-a.path
+    extend_children = false
+  }
+}
+
+# Permissions: connect resources/scopes with policies
+resource "keycloak_openid_client_authorization_permission" "view_documents" {
+  realm_id           = keycloak_realm.example.id
+  resource_server_id = keycloak_openid_client.documents_api.resource_server_id
+  name               = "view_documents"
+  type               = "scope"
+  resources          = [keycloak_openid_client_authorization_resource.documents.id]
+  scopes             = [keycloak_openid_client_authorization_scope.view.id]
+  decision_strategy  = "AFFIRMATIVE" # viewer OR editor
+  policies = [
+    keycloak_openid_client_role_policy.is_viewer.id,
+    keycloak_openid_client_role_policy.is_editor.id,
+  ]
+}
+
+resource "keycloak_openid_client_authorization_permission" "edit_documents" {
+  realm_id           = keycloak_realm.example.id
+  resource_server_id = keycloak_openid_client.documents_api.resource_server_id
+  name               = "edit_documents"
+  type               = "scope"
+  resources          = [keycloak_openid_client_authorization_resource.documents.id]
+  scopes             = [keycloak_openid_client_authorization_scope.edit.id]
+  decision_strategy  = "UNANIMOUS" # editor AND member of team-a
+  policies = [
+    keycloak_openid_client_role_policy.is_editor.id,
+    keycloak_openid_client_group_policy.in_team_a.id,
+  ]
+}
+```
+
+### Ask Keycloak for a Decision
+
+The client gets the user's access token as usual (e.g. with the [Authorization Code flow](#authorization-code-flow-with-pkce)), then asks the token endpoint about permissions with the UMA grant type. `audience` is the resource server's `client_id`, and `permission` is `resource#scope`:
+
+```sh
+curl -X POST "https://keycloak.sikademo.com/realms/example/protocol/openid-connect/token" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -d "grant_type=urn:ietf:params:oauth:grant-type:uma-ticket" \
+  -d "audience=documents_api" \
+  -d "permission=documents#edit" \
+  -d "response_mode=decision"
+```
+
+`response_mode` controls the answer:
+
+- `decision` – just `{"result": true}`, or `403` with `access_denied`. Good for a simple yes/no check in the API.
+- `permissions` – the list of granted resources and scopes, e.g. `[{"rsname": "documents", "scopes": ["view"]}]`. Good for showing or hiding buttons in the UI.
+- (not set) – a **Requesting Party Token (RPT)**: a new access token with the granted permissions in the `authorization.permissions` claim. The client sends the RPT to the API, and the API checks the claim without calling Keycloak again.
+
+Without `permission`, Keycloak evaluates all resources the user can access.
+
+Policy enforcer libraries do this for you: `keycloak-policy-enforcer` for Java (Quarkus has it built in with `quarkus-keycloak-authorization`). For other languages, call the token endpoint as above.
+
+### UMA (User-Managed Access)
+
+UMA 2.0 lets **users** manage access to their own resources, like sharing a document in Google Drive. The user (resource owner) decides who can access the resource, instead of only admins writing policies.
+
+1. Enable it in Realm settings > General > **User-managed access** ON.
+2. The resource server registers a resource for each user's object, with the user as `owner` and **User-Managed Access Enabled** (`ownerManagedAccess`). Apps do this at runtime with the Protection API (`/realms/example/authz/protection/resource_set`), using a token of the resource server's service account (Protection API Token, PAT).
+3. The owner shares the resource with other users in the Account Console (**Resources**), and picks which scopes they get (e.g. only `view`).
+4. When another user tries to access a resource they don't have permission for, the API answers `401` with a **permission ticket** (`WWW-Authenticate: UMA realm="example", as_uri="...", ticket="..."`). The client sends the ticket to the token endpoint (`grant_type=urn:ietf:params:oauth:grant-type:uma-ticket&ticket=...`) and gets an RPT if access is granted. If not, Keycloak can create a **permission request**, and the owner sees it in the Account Console and can approve or deny it.
 
 ## Install Node.js
 
