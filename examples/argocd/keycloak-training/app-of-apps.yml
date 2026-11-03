@@ -3,7 +3,6 @@ kind: Application
 metadata:
   name: app-of-apps-keycloak-training
   namespace: argocd
-  annotations:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
