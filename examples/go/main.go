@@ -30,7 +30,7 @@ func init() {
 
 var Cmd = &cobra.Command{
 	Use:   "example",
-	Short: "Examle OIDC",
+	Short: "Example OIDC",
 	Run: func(cmd *cobra.Command, args []string) {
 		Server(FlagIssuer, FlagClientID, FlagClientSecret)
 	},
