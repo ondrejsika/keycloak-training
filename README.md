@@ -925,8 +925,8 @@ Adds the user's realm roles, including roles they get from their groups and comp
 resource "keycloak_openid_user_realm_role_protocol_mapper" "example_roles" {
   realm_id        = keycloak_realm.example.id
   client_scope_id = data.keycloak_openid_client_scope.example_roles.id
-  name            = data.keycloak_openid_client_scope.example_roles.id
-  claim_name      = data.keycloak_openid_client_scope.example_roles.id
+  name            = data.keycloak_openid_client_scope.example_roles.name
+  claim_name      = data.keycloak_openid_client_scope.example_roles.name
   multivalued     = true
 }
 ```
