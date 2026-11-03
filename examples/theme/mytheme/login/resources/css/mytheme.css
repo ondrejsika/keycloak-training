@@ -1,7 +1,3 @@
-.login-pf body {
-  background-image: url(https://ond.is/ondis.jpg) !important;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-position: center;
+:root {
+  --keycloak-bg-logo-url: url(https://ond.is/ondis.jpg);
 }
