@@ -668,6 +668,213 @@ resource "keycloak_openid_client" "example" {
 
 > **Security:** These examples use `"*"` to keep the demo simple. Never use `valid_redirect_uris = ["*"]` (or `web_origins = ["*"]`) outside of a local demo. Keycloak sends the authorization code to the redirect URI, so a wildcard lets an attacker craft a login link that delivers the user's code (and with it their tokens) to a site they control (open redirect). Always list the exact URIs of your app, and use a trailing `/*` only within your own host.
 
+## OAuth 2.0 Flows (Grant Types)
+
+A flow (grant type) is the way a client gets tokens from Keycloak. Which one to use depends on who the client is acting for and where it runs:
+
+| Flow | Use case | Client type | User present |
+| --- | --- | --- | --- |
+| Authorization Code + PKCE | Web apps, SPAs, mobile apps | Public or Confidential | Yes, in the browser |
+| Client Credentials | Service-to-service, cron jobs, backends | Confidential | No |
+| Device Authorization | TVs, CLIs, devices without a browser | Public or Confidential | Yes, on another device |
+| Token Exchange | Service calls another service on behalf of the user | Confidential | No (uses an existing token) |
+| Refresh Token | Get a new access token without logging in again | Any | No |
+| ~~Password (ROPC)~~ | Testing only, see [Test Direct Access Grants](#test-direct-access-grants) | | |
+| ~~Implicit~~ | Deprecated, don't use (tokens in the URL) | | |
+
+Examples below use the `example` realm. All endpoints are listed in the discovery document:
+
+```sh
+curl -s https://keycloak.sikademo.com/realms/example/.well-known/openid-configuration | jq
+```
+
+### Authorization Code Flow with PKCE
+
+The recommended flow for any app with a user. The user logs in on Keycloak's login page (so MFA, identity providers and required actions all work), and the app only receives a short-lived one-time **authorization code** in the redirect, which it exchanges for tokens over a back channel.
+
+**PKCE** (Proof Key for Code Exchange, RFC 7636) protects the code: the app generates a random `code_verifier`, sends its SHA-256 hash (`code_challenge`) in the login request, and must send the original `code_verifier` when exchanging the code. An attacker who steals the code from the redirect can't use it without the verifier. PKCE is required for public clients and recommended for confidential clients too (mandatory in OAuth 2.1).
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant Browser
+    participant App as App (client)
+    participant KC as Keycloak
+    participant API as API (resource server)
+
+    User->>Browser: Click "Login"
+    Browser->>App: GET /login
+    App->>App: Generate state, code_verifier,<br/>code_challenge = SHA256(code_verifier)
+    App-->>Browser: 302 to Keycloak /auth?response_type=code<br/>&client_id&redirect_uri&scope=openid<br/>&state&code_challenge&code_challenge_method=S256
+    Browser->>KC: GET /auth?...
+    KC-->>Browser: Login page
+    User->>Browser: Username, password (+ MFA)
+    Browser->>KC: POST credentials
+    KC->>KC: Authenticate user, store code_challenge
+    KC-->>Browser: 302 to redirect_uri?code=...&state=...
+    Browser->>App: GET /callback?code=...&state=...
+    App->>App: Check state
+    App->>KC: POST /token grant_type=authorization_code<br/>&code&redirect_uri&code_verifier<br/>(+ client_secret if confidential)
+    KC->>KC: Check SHA256(code_verifier) == code_challenge
+    KC-->>App: access_token, id_token, refresh_token
+    App->>API: GET /resource<br/>Authorization: Bearer access_token
+    API-->>App: Protected data
+```
+
+Try it manually with the public `example` client. Generate the PKCE pair:
+
+```sh
+CODE_VERIFIER=$(openssl rand -base64 60 | tr -d '\n=+/' | cut -c1-64)
+CODE_CHALLENGE=$(printf %s "$CODE_VERIFIER" | openssl dgst -sha256 -binary | openssl base64 -A | tr '+/' '-_' | tr -d '=')
+```
+
+Open the login URL in the browser:
+
+```sh
+echo "https://keycloak.sikademo.com/realms/example/protocol/openid-connect/auth?response_type=code&client_id=example&redirect_uri=http://localhost:8000/callback&scope=openid&state=xyz&code_challenge=$CODE_CHALLENGE&code_challenge_method=S256"
+```
+
+After login, the browser is redirected to `http://localhost:8000/callback?state=xyz&code=...` (the page doesn't need to load). Copy the `code` and exchange it for tokens, within 1 minute (default code lifespan):
+
+```sh
+curl -X POST "https://keycloak.sikademo.com/realms/example/protocol/openid-connect/token" \
+  -d "grant_type=authorization_code" \
+  -d "client_id=example" \
+  -d "redirect_uri=http://localhost:8000/callback" \
+  -d "code_verifier=$CODE_VERIFIER" \
+  -d "code=<code>"
+```
+
+To require PKCE on a client, set Advanced > "Proof Key for Code Exchange Code Challenge Method" to `S256` (`pkce_code_challenge_method = "S256"` in Terraform).
+
+### Client Credentials Flow (Service Accounts)
+
+For machine-to-machine communication with no user involved. The client authenticates with its own `client_id` and `client_secret` and gets an access token for itself.
+
+In Keycloak, every client with Client Credentials enabled gets a **service account**, a special user named `service-account-<client_id>`. Roles are assigned to it in the client's "Service accounts roles" tab, and they end up in its access token like for a normal user.
+
+Enable it on a confidential client: Capability config > Client authentication ON, Authentication flow > "Service accounts roles". In Terraform:
+
+```terraform
+resource "keycloak_openid_client" "example_service" {
+  realm_id                 = keycloak_realm.example.id
+  client_id                = "example_service"
+  client_secret            = "example" # demo only, keep real secrets out of Git
+  access_type              = "CONFIDENTIAL"
+  service_accounts_enabled = true
+}
+
+resource "keycloak_openid_client_service_account_realm_role" "example_service_admin" {
+  realm_id                = keycloak_realm.example.id
+  service_account_user_id = keycloak_openid_client.example_service.service_account_user_id
+  role                    = "admin"
+}
+```
+
+Get a token:
+
+```sh
+curl -X POST "https://keycloak.sikademo.com/realms/example/protocol/openid-connect/token" \
+  -d "grant_type=client_credentials" \
+  -d "client_id=example_service" \
+  -d "client_secret=example"
+```
+
+The response has only an `access_token`, without a refresh token (the client can always ask for a new one with its secret) and without an ID token (there is no user to identify).
+
+### Device Authorization Grant
+
+For devices that can't show a login page or don't have a keyboard: smart TVs, CLIs, IoT (RFC 8628). The device shows a short code, and the user logs in on their phone or computer. Used for example by `gh auth login` or `az login --use-device-code`.
+
+Enable it on the client: Capability config > "OAuth 2.0 Device Authorization Grant" (`oauth2_device_authorization_grant_enabled = true` in Terraform).
+
+1. The device asks for a device code:
+
+```sh
+curl -X POST "https://keycloak.sikademo.com/realms/example/protocol/openid-connect/auth/device" \
+  -d "client_id=example" \
+  -d "scope=openid"
+```
+
+```json
+{
+  "device_code": "Q2l...",
+  "user_code": "ABCD-EFGH",
+  "verification_uri": "https://keycloak.sikademo.com/realms/example/device",
+  "verification_uri_complete": "https://keycloak.sikademo.com/realms/example/device?user_code=ABCD-EFGH",
+  "expires_in": 600,
+  "interval": 5
+}
+```
+
+2. The device shows `user_code` and `verification_uri` (often as a QR code of `verification_uri_complete`). The user opens it on another device, enters the code, logs in and approves.
+
+3. Meanwhile the device polls the token endpoint every `interval` seconds:
+
+```sh
+curl -X POST "https://keycloak.sikademo.com/realms/example/protocol/openid-connect/token" \
+  -d "grant_type=urn:ietf:params:oauth:grant-type:device_code" \
+  -d "client_id=example" \
+  -d "device_code=<device_code>"
+```
+
+Until the user finishes, Keycloak returns `authorization_pending` (or `slow_down` if polling too fast). After approval, it returns the tokens.
+
+### Token Exchange
+
+Token Exchange (RFC 8693) trades one token for another. Typical use: a frontend calls service A with the user's token, and service A needs to call service B **as the same user**. Instead of forwarding its own token (which has the wrong audience and maybe too many permissions), service A exchanges it for a new token for service B.
+
+Since Keycloak 26.2, **Standard Token Exchange** (V2) is fully supported (GA) and doesn't need any feature flag. Enable it on the requesting client (service A, must be confidential): Capability config > "Standard Token Exchange".
+
+```sh
+curl -X POST "https://keycloak.sikademo.com/realms/example/protocol/openid-connect/token" \
+  -d "grant_type=urn:ietf:params:oauth:grant-type:token-exchange" \
+  -d "client_id=service-a" \
+  -d "client_secret=example" \
+  -d "subject_token=<user's access token>" \
+  -d "subject_token_type=urn:ietf:params:oauth:token-type:access_token" \
+  -d "audience=service-b"
+```
+
+Rules for standard token exchange:
+
+- The subject token must have the requesting client in its `aud` claim (add an Audience mapper to the frontend's client scope), so a client can only exchange tokens that were meant for it.
+- `audience` and `scope` can only narrow down the new token (downscoping), never add permissions the user doesn't have.
+- It returns an access token by default. A refresh token can be requested with `requested_token_type=urn:ietf:params:oauth:token-type:refresh_token`, if the client allows it.
+- Only internal-to-internal exchange (Keycloak token for Keycloak token). Exchanging external IdP tokens and impersonation are still only in the legacy Token Exchange V1, which is a preview feature (`--features=token-exchange`).
+
+### Refresh Tokens
+
+Access tokens are short-lived (5 minutes by default in Keycloak). When one expires, the client uses the refresh token to get a new one, without the user logging in again:
+
+```sh
+curl -X POST "https://keycloak.sikademo.com/realms/example/protocol/openid-connect/token" \
+  -d "grant_type=refresh_token" \
+  -d "client_id=example" \
+  -d "refresh_token=<refresh_token>"
+```
+
+- A refresh token is tied to the user's SSO session. It stops working when the session ends: on logout, after SSO Session Idle (30 minutes without activity by default) or SSO Session Max (10 hours by default). Settings are in Realm settings > Sessions and Tokens.
+- When the user logs out or an admin ends the session, all its refresh tokens are invalidated.
+- Refresh token rotation (Realm settings > Tokens > "Revoke Refresh Token") makes each refresh token single use, which helps detect stolen tokens. It's off by default.
+
+### Offline Tokens
+
+An offline token is a refresh token that is **not** tied to the SSO session. It keeps working after the user logs out of the browser, closes it, or Keycloak restarts, because offline sessions are stored in the database. Use it when an app needs to act for the user while they are away, e.g. nightly sync jobs or mobile apps that should stay logged in for weeks.
+
+Request it by adding the `offline_access` scope to the login request (the user needs the `offline_access` realm role, which is in the default roles). Run the [Authorization Code flow](#authorization-code-flow-with-pkce) with this login URL, and exchange the code the same way:
+
+```sh
+echo "https://keycloak.sikademo.com/realms/example/protocol/openid-connect/auth?response_type=code&client_id=example&redirect_uri=http://localhost:8000/callback&scope=openid%20offline_access&state=xyz&code_challenge=$CODE_CHALLENGE&code_challenge_method=S256"
+```
+
+The `refresh_token` in the response is now an offline token.
+
+- The decoded refresh token has `"typ": "Offline"` instead of `"typ": "Refresh"`.
+- It expires after Offline Session Idle (30 days without use by default). Offline Session Max is disabled by default, so an offline token used regularly never expires.
+- Store it securely, it's a long-lived credential. Users can revoke it in the Account Console (Applications), admins in the user's Consents tab or Sessions.
+
 ## Client Scopes & Protocol Mappers
 
 ## Client Scopes
