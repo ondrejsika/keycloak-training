@@ -900,7 +900,11 @@ data "keycloak_openid_client_scope" "example_roles" {
 
 ## Protocol Mappers
 
+A protocol mapper decides what goes into the tokens (ID token, access token, UserInfo): it takes data about the user or the client (attributes, roles, groups, a fixed value, ...) and adds it as a claim. Mappers live in a client scope (so every client with that scope gets the claim) or directly on one client (in its dedicated scope).
+
 ### Group Membership Protocol Mapper
+
+Adds the groups the user is a member of as a list, e.g. `"groups": ["team-a", "team-b"]`. With `full_path = true` it uses the full path, e.g. `"/team-a"` (and `"/parent/child"` for subgroups).
 
 ```terraform
 resource "keycloak_openid_group_membership_protocol_mapper" "example_groups" {
@@ -914,6 +918,8 @@ resource "keycloak_openid_group_membership_protocol_mapper" "example_groups" {
 ```
 
 ### Realm Roles Protocol Mapper
+
+Adds the user's realm roles, including roles they get from their groups and composite roles. Keycloak's built-in `roles` scope already puts them into `realm_access.roles`. This mapper adds them as a list into a claim of your choice, e.g. `"roles": ["editor", "viewer"]`, which is easier for apps to read.
 
 ```terraform
 resource "keycloak_openid_user_realm_role_protocol_mapper" "example_roles" {
