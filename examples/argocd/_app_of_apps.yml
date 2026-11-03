@@ -16,6 +16,6 @@ spec:
     syncOptions:
       - CreateNamespace=true
   source:
-    path: examples/argocd/keycloak-training/apps
     repoURL: https://github.com/ondrejsika/keycloak-training.git
     targetRevision: master
+    path: examples/argocd
