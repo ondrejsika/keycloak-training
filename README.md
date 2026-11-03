@@ -626,20 +626,39 @@ curl -X POST "https://keycloak.sikademo.com/realms/test/protocol/openid-connect/
 
 ### Create Client using Terraform
 
+Confidential client (server-side app that can keep a secret):
+
 ```terraform
-resource "keycloak_openid_client" "example" {
+resource "keycloak_openid_client" "example_backend" {
   realm_id                        = keycloak_realm.example.id
-  client_id                       = "example"
-  client_secret                   = "example"
+  client_id                       = "example_backend"
+  client_secret                   = "example" # demo only, keep real secrets out of Git
   enabled                         = true
+  access_type                     = "CONFIDENTIAL"
   standard_flow_enabled           = true
-  direct_access_grants_enabled    = true
-  access_type                     = "PUBLIC" # or "CONFIDENTIAL"
   valid_redirect_uris             = ["*"]
   valid_post_logout_redirect_uris = ["*"]
   web_origins                     = ["*"]
 }
 ```
+
+Public client (SPA or mobile app). It runs on the user's device and cannot keep a secret, so it has no `client_secret` and uses PKCE instead:
+
+```terraform
+resource "keycloak_openid_client" "example" {
+  realm_id                        = keycloak_realm.example.id
+  client_id                       = "example"
+  enabled                         = true
+  access_type                     = "PUBLIC"
+  standard_flow_enabled           = true
+  pkce_code_challenge_method      = "S256"
+  valid_redirect_uris             = ["*"]
+  valid_post_logout_redirect_uris = ["*"]
+  web_origins                     = ["*"]
+}
+```
+
+> **Security:** These examples use `"*"` to keep the demo simple. Never use `valid_redirect_uris = ["*"]` (or `web_origins = ["*"]`) outside of a local demo. Keycloak sends the authorization code to the redirect URI, so a wildcard lets an attacker craft a login link that delivers the user's code (and with it their tokens) to a site they control (open redirect). Always list the exact URIs of your app, and use a trailing `/*` only within your own host.
 
 ## Client Scopes & Protocol Mappers
 
