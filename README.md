@@ -749,22 +749,22 @@ resource "keycloak_openid_client_optional_scopes" "example" {
 Setup NVM
 
 ```sh
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.8/install.sh | bash
 echo '. ~/.nvm/nvm.sh' >> ~/.zshrc
 echo '. ~/.nvm/nvm.sh' >> ~/.bashrc
 . ~/.nvm/nvm.sh
 ```
 
-Install Node 22
+Install Node 26 (active LTS)
 
 ```sh
-nvm install 22
+nvm install 26
 ```
 
-Use Node 22
+Use Node 26
 
 ```sh
-nvm use 22
+nvm use 26
 ```
 
 ## Express.js example without any Keycloak Library
