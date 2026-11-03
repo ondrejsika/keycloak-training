@@ -958,7 +958,7 @@ resource "keycloak_openid_client_default_scopes" "example" {
 
 ## Optional Client Scopes
 
-Optional scopes are applied only when the client asks for them in the `scope` parameter of the login (or token) request, e.g. `scope=openid groups`. Use them for data that only some requests need, like `offline_access` or `phone`.
+Optional scopes are applied only when the client asks for them in the `scope` parameter of the login (or token) request, e.g. `scope=openid phone`. Use them for data that only some requests need, like `phone` or `offline_access`.
 
 ```terraform
 resource "keycloak_openid_client_optional_scopes" "example" {
@@ -966,7 +966,7 @@ resource "keycloak_openid_client_optional_scopes" "example" {
   client_id = keycloak_openid_client.example.id
 
   optional_scopes = [
-    keycloak_openid_client_scope.example_groups.name,
+    "phone",
   ]
 }
 ```
