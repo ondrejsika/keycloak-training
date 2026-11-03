@@ -27,7 +27,7 @@ spec:
         config:
           clientID: "oauth2_proxy"
           clientSecret: "example"
-          # Genetate cookieSecret using `openssl rand -base64 32 | head -c 32 | base64`
+          # Generate cookieSecret using `openssl rand -base64 32 | head -c 32 | base64`
           cookieSecret: "VWZ4VnJzaEZZQXkrYmJIdUxDeFFUTGkza3NqSHhOTWk="
           configFile: |-
             # https://github.com/oauth2-proxy/oauth2-proxy/blob/master/contrib/local-environment/oauth2-proxy-keycloak.cfg
