@@ -334,66 +334,7 @@ TODO
 
 ## Install Production Keycloak to Kubernetes using ArgoCD
 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: keycloak-sikademo-com
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-spec:
-  project: default
-  destination:
-    namespace: keycloak-sikademo-com
-    server: https://kubernetes.default.svc
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-    - CreateNamespace=true
-  source:
-    repoURL: registry-1.docker.io/bitnamicharts
-    targetRevision: 24.4.10
-    chart: keycloak
-    helm:
-      valuesObject:
-        # https://github.com/bitnami/charts/blob/main/bitnami/keycloak/values.yaml
-        # https://artifacthub.io/packages/helm/bitnami/keycloak?modal=values
-        replicaCount: 1
-        global:
-          security:
-            allowInsecureImages: true
-        image:
-          registry: ghcr.io
-          repository: sikalabs/bitnami-keycloak-sikalabs-theme
-          tag: 26.1.2-debian-12-r0
-        auth:
-          createAdminUser: true
-          adminUser: admin
-          adminPassword: admin
-          managementUser: management
-          managementPassword: management
-        proxyAddressForwarding: true
-        service:
-          type: ClusterIP
-        ingress:
-          enabled: true
-          hostname: keycloak.sikademo.com
-          tls: true
-          annotations:
-            kubernetes.io/ingress.class: nginx
-            nginx.ingress.kubernetes.io/proxy-body-size: 250m
-            nginx.ingress.kubernetes.io/proxy-buffer-size: "64k"
-            cert-manager.io/cluster-issuer: letsencrypt
-        postgresql:
-          auth:
-            postgresPassword: pg
-            password: pg
-```
-
-Keycloak will be available on <https://keycloak.sikademo.com>. Admin user is `admin` and password is `admin`.
+TODO
 
 ## Get Keycloak Version
 
