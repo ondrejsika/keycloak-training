@@ -1,19 +1,19 @@
-module "group--admins" {
+module "admins_group" {
   source = "./modules/group"
 
   realm_id = keycloak_realm.example.id
   name     = "admins"
   role_ids = [
-    module.client--example.roles["administrator"].id,
-    module.client--example.roles["editor"].id,
-    module.client--example.roles["uzivatel"].id,
-    module.client--example.roles["viewer"].id,
-    module.client--foo.roles["administrator"].id,
-    module.client--bar.roles["editor"].id,
+    module.example_client.roles["administrator"].id,
+    module.example_client.roles["editor"].id,
+    module.example_client.roles["uzivatel"].id,
+    module.example_client.roles["viewer"].id,
+    module.foo_client.roles["administrator"].id,
+    module.bar_client.roles["editor"].id,
   ]
 }
 
-module "group--editors" {
+module "editors_group" {
   source = "./modules/group"
 
   realm_id = keycloak_realm.example.id
@@ -21,20 +21,20 @@ module "group--editors" {
   role_ids = []
 }
 
-module "group--viewers" {
+module "viewers_group" {
   source = "./modules/group"
 
   realm_id = keycloak_realm.example.id
   name     = "viewers"
   role_ids = [
-    module.client--example.roles["uzivatel"].id,
-    module.client--example.roles["viewer"].id,
-    module.client--foo.roles["uzivatel"].id,
-    module.client--bar.roles["viewer"].id,
+    module.example_client.roles["uzivatel"].id,
+    module.example_client.roles["viewer"].id,
+    module.foo_client.roles["uzivatel"].id,
+    module.bar_client.roles["viewer"].id,
   ]
 }
 
-module "group--argocd-admins" {
+module "argocd_admins_group" {
   source = "./modules/group"
 
   realm_id = keycloak_realm.example.id
@@ -42,7 +42,7 @@ module "group--argocd-admins" {
   role_ids = []
 }
 
-module "group--argocd-viewers" {
+module "argocd_viewers_group" {
   source = "./modules/group"
 
   realm_id = keycloak_realm.example.id

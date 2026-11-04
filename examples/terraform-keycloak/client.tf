@@ -1,4 +1,4 @@
-module "client--example" {
+module "example_client" {
   source = "./modules/client"
 
   realm_id      = keycloak_realm.example.id
@@ -13,7 +13,7 @@ module "client--example" {
   ]
 }
 
-module "client--foo" {
+module "foo_client" {
   source = "./modules/client"
 
   realm_id      = keycloak_realm.example.id
@@ -26,7 +26,7 @@ module "client--foo" {
   ]
 }
 
-module "client--bar" {
+module "bar_client" {
   source = "./modules/client"
 
   realm_id      = keycloak_realm.example.id
@@ -39,7 +39,7 @@ module "client--bar" {
   ]
 }
 
-module "client--oauth2_proxy" {
+module "oauth2_proxy_client" {
   source = "./modules/client"
 
   realm_id      = keycloak_realm.example.id
@@ -49,7 +49,7 @@ module "client--oauth2_proxy" {
   roles         = []
 }
 
-module "client--argocd" {
+module "argocd_client" {
   source = "./modules/client"
 
   realm_id      = keycloak_realm.example.id

@@ -6,10 +6,10 @@ locals {
       last_name  = "Sika"
       enabled    = true
       group_ids = [
-        module.group--admins.id,
-        module.group--editors.id,
-        module.group--viewers.id,
-        module.group--argocd-admins.id,
+        module.admins_group.id,
+        module.editors_group.id,
+        module.viewers_group.id,
+        module.argocd_admins_group.id,
       ]
       department = "IT"
     }
@@ -19,9 +19,9 @@ locals {
       last_name  = "Demo"
       enabled    = true
       group_ids = [
-        module.group--editors.id,
-        module.group--viewers.id,
-        module.group--argocd-viewers.id,
+        module.editors_group.id,
+        module.viewers_group.id,
+        module.argocd_viewers_group.id,
       ]
       department = "Office"
     }
@@ -31,7 +31,7 @@ locals {
       last_name  = "Demo"
       enabled    = true
       group_ids = [
-        module.group--viewers.id,
+        module.viewers_group.id,
       ]
       department = "Trainee"
     }
