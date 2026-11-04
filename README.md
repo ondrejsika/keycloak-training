@@ -340,7 +340,27 @@ Keycloak will be available on `https://$HOST`. Admin user is `admin` and passwor
 
 ## Install Production Keycloak to Kubernetes
 
-TODO
+Install CNPG using Helm
+
+```sh
+helm repo add cnpg https://cloudnative-pg.github.io/charts
+helm repo update
+helm install cnpg cnpg/cloudnative-pg --create-namespace --namespace cnpg-system
+```
+
+Install Keycloak Operator using Helm
+
+```sh
+helm repo add keycloak https://www.keycloak.org/helm/charts
+helm repo update
+helm install keycloak-operator keycloak/keycloak-operator --create-namespace --namespace keycloak-operator
+```
+
+Apply manifests
+
+```sh
+kubectl apply -f examples/kubernetes
+```
 
 ## Install Production Keycloak to Kubernetes using ArgoCD
 
