@@ -15,6 +15,14 @@ services:
       retries: 10
   keycloak:
     image: quay.io/keycloak/keycloak:26.8.1
+    command:
+      - start
+      - --hostname
+      - ${HOST?Environment variable HOST is not set}
+      - --proxy-headers
+      - xforwarded
+      - --http-enabled
+      - 'true'
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
@@ -25,14 +33,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command:
-      - start
-      - --hostname
-      - ${HOST?Environment variable HOST is not set}
-      - --proxy-headers
-      - xforwarded
-      - --http-enabled
-      - 'true'
   caddy:
     build:
       dockerfile_inline: |
