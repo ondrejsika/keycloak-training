@@ -1,0 +1,30 @@
+apiVersion: k8s.keycloak.org/v2beta1
+kind: Keycloak
+metadata:
+  name: keycloak-test
+  namespace: keycloak-test
+spec:
+  instances: 1
+  image: ghcr.io/sikalabs/keycloak-with-sikalabs-themes:26.8.1
+  startOptimized: false
+  bootstrapAdmin:
+    user:
+      secret: keycloak-test-admin
+  db:
+    vendor: postgres
+    host: keycloak-test-db-rw
+    database: keycloak_test
+    usernameSecret:
+      name: keycloak-test-db-app
+      key: username
+    passwordSecret:
+      name: keycloak-test-db-app
+      key: password
+  http:
+    httpEnabled: true
+  hostname:
+    hostname: https://keycloak-test.sikademo.com
+  proxy:
+    headers: xforwarded
+  ingress:
+    enabled: false
