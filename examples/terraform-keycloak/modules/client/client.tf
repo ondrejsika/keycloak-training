@@ -15,6 +15,12 @@ variable "roles" {}
 variable "full_scope_allowed" {
   default = false
 }
+variable "service_accounts_enabled" {
+  default = false
+}
+variable "service_account_roles" {
+  default = []
+}
 
 resource "keycloak_openid_client" "this" {
   realm_id                        = var.realm_id
@@ -27,6 +33,7 @@ resource "keycloak_openid_client" "this" {
   valid_post_logout_redirect_uris = ["*"]
   web_origins                     = ["*"]
   full_scope_allowed              = var.full_scope_allowed
+  service_accounts_enabled        = var.service_accounts_enabled
 }
 
 resource "keycloak_openid_user_attribute_protocol_mapper" "department" {
@@ -85,4 +92,13 @@ resource "keycloak_role" "this" {
 
 output "roles" {
   value = keycloak_role.this
+}
+
+resource "keycloak_openid_client_service_account_role" "this" {
+  for_each = { for role in var.service_account_roles : role => role }
+
+  realm_id                = var.realm_id
+  client_id               = keycloak_openid_client.this.id
+  service_account_user_id = keycloak_openid_client.this.service_account_user_id
+  role                    = each.key
 }
