@@ -19,6 +19,7 @@ func main() {
 var FlagIssuer string
 var FlagClientID string
 var FlagClientSecret string
+var FlagRedirectOrigin string
 
 func init() {
 	Cmd.Flags().StringVar(&FlagIssuer, "issuer", "", "Issuer")
@@ -27,6 +28,7 @@ func init() {
 	Cmd.MarkFlagRequired("client-id")
 	Cmd.Flags().StringVar(&FlagClientSecret, "client-secret", "", "Client Secret")
 	Cmd.MarkFlagRequired("client-secret")
+	Cmd.Flags().StringVar(&FlagRedirectOrigin, "redirect-origin", "http://127.0.0.1:8000", "Redirect Origin")
 }
 
 var Cmd = &cobra.Command{
@@ -49,7 +51,7 @@ func Server(issuer, clientID, clientSecret string) {
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		Endpoint:     provider.Endpoint(),
-		RedirectURL:  "http://localhost:8000/callback",
+		RedirectURL:  FlagRedirectOrigin + "/callback",
 		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 	}
 
@@ -121,7 +123,7 @@ func Server(issuer, clientID, clientSecret string) {
 		fmt.Fprintf(w, "\n")
 	})
 
-	fmt.Println("http://localhost:8000/")
+	fmt.Println(FlagRedirectOrigin)
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
 
