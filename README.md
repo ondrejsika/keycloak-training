@@ -102,6 +102,8 @@ OAuth 2.0 and OpenID Connect (OIDC) are related but serve different purposes.
 - Tokens: Issues an ID token (JWT) containing user identity details (like name, email, etc.), along with an access token.
 - Identity Information: Designed to authenticate users, making it useful for Single Sign-On (SSO).
 
+See discovery endpoint: <https://sso.sikalabs.com/realms/training/.well-known/openid-configuration>
+
 ### Key Difference
 
 - OAuth 2.0 is for authorization (who can access what).
@@ -403,6 +405,8 @@ Realm is a container for users, credentials, roles, groups and other entities. E
 
 Go to <https://keycloak.sikademo.com> and login as `admin` with password `admin`. Click on `Create realm` button and fill the form.
 
+See: <https://keycloak.sikademo.com/realms/manual/.well-known/openid-configuration>
+
 ### Create Realm using Terraform
 
 ```terraform
@@ -460,6 +464,8 @@ resource "keycloak_realm" "example" {
   }
 }
 ```
+
+See: <https://keycloak.sikademo.com/realms/example/.well-known/openid-configuration>
 
 ## Users
 
