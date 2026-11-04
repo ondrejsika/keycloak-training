@@ -694,38 +694,6 @@ The recommended flow for any app with a user. The user logs in on Keycloak's log
 
 **PKCE** (Proof Key for Code Exchange, RFC 7636) protects the code: the app generates a random `code_verifier`, sends its SHA-256 hash (`code_challenge`) in the login request, and must send the original `code_verifier` when exchanging the code. An attacker who steals the code from the redirect can't use it without the verifier. PKCE is required for public clients and recommended for confidential clients too (mandatory in OAuth 2.1).
 
-<!--
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User
-    participant Browser
-    participant App as App (client)
-    participant KC as Keycloak
-    participant API as API (resource server)
-
-    User->>Browser: Click "Login"
-    Browser->>App: GET /login
-    App->>App: Generate state, code_verifier,<br/>code_challenge = SHA256(code_verifier)
-    App-->>Browser: 302 to Keycloak /auth?response_type=code<br/>&client_id&redirect_uri&scope=openid<br/>&state&code_challenge&code_challenge_method=S256
-    Browser->>KC: GET /auth?...
-    KC-->>Browser: Login page
-    User->>Browser: Username, password (+ MFA)
-    Browser->>KC: POST credentials
-    KC->>KC: Authenticate user, store code_challenge
-    KC-->>Browser: 302 to redirect_uri?code=...&state=...
-    Browser->>App: GET /callback?code=...&state=...
-    App->>App: Check state
-    App->>KC: POST /token grant_type=authorization_code<br/>&code&redirect_uri&code_verifier<br/>(+ client_secret if confidential)
-    KC->>KC: Check SHA256(code_verifier) == code_challenge
-    KC-->>App: access_token, id_token, refresh_token
-    App->>API: GET /resource<br/>Authorization: Bearer access_token
-    API-->>App: Protected data
-```
-
--->
-
 Try it manually with the public `example` client. Generate the PKCE pair:
 
 ```sh
