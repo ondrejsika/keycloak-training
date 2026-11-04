@@ -1,0 +1,31 @@
+apiVersion: k8s.keycloak.org/v2beta1
+kind: Keycloak
+metadata:
+  name: keycloak
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  instances: 1
+  image: ghcr.io/sikalabs/keycloak-with-sikalabs-themes:26.8.1
+  startOptimized: false
+  bootstrapAdmin:
+    user:
+      secret: keycloak-admin
+  db:
+    vendor: postgres
+    host: keycloak-db-rw
+    database: keycloak
+    usernameSecret:
+      name: keycloak-db-app
+      key: username
+    passwordSecret:
+      name: keycloak-db-app
+      key: password
+  http:
+    httpEnabled: true
+  hostname:
+    hostname: https://keycloak.sikademo.com
+  proxy:
+    headers: xforwarded
+  ingress:
+    enabled: false
