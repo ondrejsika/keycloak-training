@@ -1526,6 +1526,10 @@ Wanna to go for a beer or do some work together? Just [book me](https://book-me.
 
 ## Training Sessions
 
+#### 2026-11-04
+
+- https://github.com/sika-training-examples/2026-11-04-keycloak-terraform-example
+
 #### 2025-02-26 Ataccama
 
 - https://github.com/sika-training-examples/2025-02-26_keycloak-ataccama-example (in training example repo)
