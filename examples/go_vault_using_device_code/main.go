@@ -1,16 +1,14 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
+	vault "github.com/hashicorp/vault/api"
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2"
 )
@@ -44,8 +42,8 @@ var Cmd = &cobra.Command{
 	Short: "Read a Vault secret using Keycloak Device Authorization Grant",
 	Run: func(cmd *cobra.Command, args []string) {
 		idToken := Device(FlagIssuer, FlagClientID, FlagClientSecret)
-		vaultToken := VaultLogin(FlagVaultAddr, FlagVaultAuthMount, FlagVaultRole, idToken)
-		data := VaultReadKV2(FlagVaultAddr, vaultToken, FlagSecretMount, FlagSecretPath)
+		client := VaultLogin(FlagVaultAddr, FlagVaultAuthMount, FlagVaultRole, idToken)
+		data := VaultReadKV2(client, FlagSecretMount, FlagSecretPath)
 		out, _ := json.MarshalIndent(data, "", "  ")
 		fmt.Println(string(out))
 	},
@@ -91,62 +89,42 @@ func Device(issuer, clientID, clientSecret string) string {
 	return rawIDToken
 }
 
-// VaultLogin exchanges the JWT for a Vault token
+// VaultLogin exchanges the JWT for a Vault token and returns
+// a Vault client authenticated with that token
 // POST /v1/auth/<mount>/login {"role": "...", "jwt": "..."}
-func VaultLogin(vaultAddr, mount, role, jwt string) string {
-	body, _ := json.Marshal(map[string]string{
+func VaultLogin(vaultAddr, mount, role, jwt string) *vault.Client {
+	config := vault.DefaultConfig()
+	config.Address = vaultAddr
+
+	client, err := vault.NewClient(config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	secret, err := client.Logical().Write("auth/"+mount+"/login", map[string]interface{}{
 		"role": role,
 		"jwt":  jwt,
 	})
-
-	var resp struct {
-		Auth struct {
-			ClientToken string   `json:"client_token"`
-			Policies    []string `json:"policies"`
-		} `json:"auth"`
+	if err != nil {
+		log.Fatal(err)
 	}
-	vaultRequest(http.MethodPost, vaultAddr+"/v1/auth/"+mount+"/login", "", body, &resp)
+	if secret == nil || secret.Auth == nil {
+		log.Fatal("No auth info in Vault login response")
+	}
 
-	fmt.Println("Logged in to Vault, policies:", strings.Join(resp.Auth.Policies, ", "))
+	fmt.Println("Logged in to Vault, policies:", strings.Join(secret.Auth.Policies, ", "))
 	fmt.Println()
 
-	return resp.Auth.ClientToken
+	client.SetToken(secret.Auth.ClientToken)
+	return client
 }
 
 // VaultReadKV2 reads a secret from KV v2 secret engine
 // GET /v1/<mount>/data/<path>
-func VaultReadKV2(vaultAddr, token, mount, path string) map[string]interface{} {
-	var resp struct {
-		Data struct {
-			Data map[string]interface{} `json:"data"`
-		} `json:"data"`
-	}
-	vaultRequest(http.MethodGet, vaultAddr+"/v1/"+mount+"/data/"+path, token, nil, &resp)
-	return resp.Data.Data
-}
-
-func vaultRequest(method, url, token string, body []byte, out interface{}) {
-	req, err := http.NewRequest(method, url, bytes.NewReader(body))
+func VaultReadKV2(client *vault.Client, mount, path string) map[string]interface{} {
+	secret, err := client.KVv2(mount).Get(context.Background(), path)
 	if err != nil {
 		log.Fatal(err)
 	}
-	req.Header.Set("Content-Type", "application/json")
-	if token != "" {
-		req.Header.Set("X-Vault-Token", token)
-	}
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	resBody, _ := io.ReadAll(res.Body)
-	if res.StatusCode != http.StatusOK {
-		log.Fatalf("%s %s: %s: %s", method, url, res.Status, resBody)
-	}
-
-	if err := json.Unmarshal(resBody, out); err != nil {
-		log.Fatal(err)
-	}
+	return secret.Data
 }
