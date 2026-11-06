@@ -1351,6 +1351,10 @@ Built-in flows can't be edited directly. Duplicate one (Authentication > Flows >
 
 Users with the `admin` realm role must use OTP. If they don't have it yet, Keycloak asks them to set it up at login. Other users log in with a password only.
 
+You can use my OTP app for storing OTP secrets during the training. The OTP is stored in localStorage of your browser, **it is only for the training purposes and not for production use**.
+
+<https://otp-app.lovable.app>
+
 ```terraform
 resource "keycloak_authentication_flow" "browser_admin_otp" {
   realm_id = keycloak_realm.example.id
